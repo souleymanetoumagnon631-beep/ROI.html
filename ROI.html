@@ -1,0 +1,2794 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROI Calculator Pro — FCFA</title>
+<style>
+:root{
+  --sidebar-w:262px;
+  --bg:#07080f;
+  --surface:#0f1120;
+  --surface2:#161929;
+  --surface3:#1d2138;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);
+  --accent:#7c6fff;
+  --accent2:#a78bfa;
+  --accent3:#c4b5fd;
+  --glow:rgba(124,111,255,0.32);
+  --green:#34d399;
+  --green-d:#10b981;
+  --green-bg:rgba(52,211,153,0.09);
+  --green-b:rgba(52,211,153,0.22);
+  --red:#f87171;
+  --red-d:#ef4444;
+  --red-bg:rgba(248,113,113,0.09);
+  --red-b:rgba(248,113,113,0.22);
+  --yellow:#fbbf24;
+  --yellow-bg:rgba(251,191,36,0.09);
+  --yellow-b:rgba(251,191,36,0.22);
+  --blue:#60a5fa;
+  --blue-bg:rgba(96,165,250,0.09);
+  --blue-b:rgba(96,165,250,0.22);
+  --orange:#fb923c;
+  --orange-bg:rgba(251,146,60,0.09);
+  --orange-b:rgba(251,146,60,0.22);
+  --pink:#f472b6;
+  --pink-bg:rgba(244,114,182,0.09);
+  --text:#f1f5f9;
+  --text2:#8892a4;
+  --text3:#44516a;
+  --radius:14px;
+  --shadow:0 6px 36px rgba(0,0,0,0.55);
+  --shadow-lg:0 12px 56px rgba(0,0,0,0.72);
+  --tr:all .2s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 15% 10%,rgba(124,111,255,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 85%,rgba(52,211,153,0.04) 0%,transparent 55%);
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* ── LAYOUT ── */
+.app{display:flex;min-height:100vh}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);
+  background:linear-gradient(180deg,#0c0e1c 0%,#090b15 100%);
+  border-right:1px solid var(--border);
+  position:fixed;top:0;left:0;bottom:0;z-index:50;
+  display:flex;flex-direction:column;
+  transition:transform .32s cubic-bezier(.4,0,.2,1);
+  box-shadow:4px 0 50px rgba(0,0,0,0.5);
+}
+.sidebar-logo{
+  padding:24px 18px 20px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(124,111,255,0.09) 0%,transparent 100%);
+}
+.logo-row{display:flex;align-items:center;gap:13px}
+.logo-icon{
+  width:44px;height:44px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:13px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+  box-shadow:0 4px 22px var(--glow),inset 0 1px 0 rgba(255,255,255,0.2);
+  position:relative;
+}
+.logo-title{
+  font-size:1.05rem;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(135deg,#fff 30%,var(--accent3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.logo-sub{font-size:.63rem;color:var(--text3);margin-top:2px;letter-spacing:.04em}
+.sidebar-nav{padding:10px 10px;flex:1;overflow-y:auto}
+.nav-sec{font-size:.59rem;color:var(--text3);text-transform:uppercase;letter-spacing:.14em;padding:14px 12px 5px;font-weight:700}
+.nav-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 14px;border-radius:10px;
+  cursor:pointer;color:var(--text2);font-size:.845rem;font-weight:500;
+  transition:var(--tr);user-select:none;margin-bottom:2px;
+  position:relative;border:1px solid transparent;
+}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:var(--text);border-color:var(--border)}
+.nav-item.active{
+  background:linear-gradient(135deg,rgba(124,111,255,0.2),rgba(124,111,255,0.07));
+  color:var(--accent3);font-weight:700;
+  border-color:rgba(124,111,255,0.28);
+  box-shadow:0 2px 14px rgba(124,111,255,0.14),inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.nav-item.active::before{
+  content:'';position:absolute;left:-1px;top:25%;bottom:25%;
+  width:3px;border-radius:0 99px 99px 0;
+  background:linear-gradient(180deg,var(--accent),var(--accent2));
+  box-shadow:0 0 10px var(--accent);
+}
+.nav-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0;transition:var(--tr)}
+.nav-item:hover .nav-icon,.nav-item.active .nav-icon{transform:scale(1.15)}
+.nav-badge{
+  margin-left:auto;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-size:.6rem;font-weight:700;
+  padding:2px 7px;border-radius:99px;min-width:20px;text-align:center;
+  box-shadow:0 2px 8px var(--glow);
+}
+.sidebar-footer{padding:14px 10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.sb-btn{
+  display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:10px;
+  cursor:pointer;font-size:.8rem;font-weight:600;border:none;width:100%;text-align:left;transition:var(--tr);
+}
+.sb-btn.export{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.sb-btn.export:hover{background:rgba(52,211,153,0.16);transform:translateX(3px)}
+.sb-btn.reset{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.sb-btn.reset:hover{background:rgba(248,113,113,0.16);transform:translateX(3px)}
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.72);backdrop-filter:blur(5px);z-index:49;
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:rgba(10,12,22,0.88);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-bottom:1px solid var(--border);
+  padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  position:sticky;top:0;z-index:40;
+}
+.topbar-title{
+  font-size:1rem;font-weight:700;
+  display:flex;align-items:center;gap:10px;
+}
+.hamburger{
+  display:none;background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;width:38px;height:38px;cursor:pointer;
+  align-items:center;justify-content:center;font-size:18px;
+  color:var(--text);flex-shrink:0;transition:var(--tr);
+}
+.hamburger:hover{background:var(--surface3);border-color:var(--border2)}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:9px 18px;border-radius:9px;border:none;cursor:pointer;
+  font-size:.875rem;font-weight:600;transition:var(--tr);
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  position:relative;overflow:hidden;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;
+  box-shadow:0 4px 18px rgba(124,111,255,0.38),inset 0 1px 0 rgba(255,255,255,0.14);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(124,111,255,0.52)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.btn-secondary:hover{background:var(--surface3);border-color:rgba(255,255,255,0.18)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.btn-danger:hover{background:rgba(248,113,113,0.18)}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.btn-success:hover{background:rgba(52,211,153,0.18)}
+.btn-warning{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-b)}
+.btn-warning:hover{background:rgba(251,191,36,0.18)}
+.btn-sm{padding:6px 13px;font-size:.78rem;border-radius:8px}
+.btn-icon{width:33px;height:33px;padding:0;justify-content:center;border-radius:8px}
+
+/* ── CARDS ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  transition:var(--tr);position:relative;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);
+}
+.card-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:linear-gradient(135deg,rgba(255,255,255,0.02) 0%,transparent 100%);
+}
+.card-title{font-size:.92rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-body{padding:20px}
+
+/* ── PAGES ── */
+.page{padding:28px;flex:1;display:none;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px 18px;
+  position:relative;overflow:hidden;transition:var(--tr);
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;
+}
+.stat-card::after{
+  content:'';position:absolute;top:-30%;right:-15%;
+  width:90px;height:90px;border-radius:50%;opacity:.07;transition:var(--tr);
+}
+.stat-card:hover{transform:translateY(-3px);border-color:var(--border2);box-shadow:var(--shadow)}
+.stat-card:hover::after{opacity:.14;transform:scale(1.25)}
+.c-purple::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.c-purple::after{background:var(--accent)}
+.c-green::before{background:linear-gradient(90deg,var(--green-d),var(--green))}
+.c-green::after{background:var(--green)}
+.c-red::before{background:linear-gradient(90deg,var(--red-d),var(--red))}
+.c-red::after{background:var(--red)}
+.c-blue::before{background:linear-gradient(90deg,#3b82f6,var(--blue))}
+.c-blue::after{background:var(--blue)}
+.c-yellow::before{background:linear-gradient(90deg,#f59e0b,var(--yellow))}
+.c-yellow::after{background:var(--yellow)}
+.c-orange::before{background:linear-gradient(90deg,#ea580c,var(--orange))}
+.c-orange::after{background:var(--orange)}
+.stat-icon{font-size:1.55rem;margin-bottom:13px;display:block}
+.stat-label{font-size:.67rem;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;font-weight:600}
+.stat-val{font-size:1.28rem;font-weight:800;line-height:1.2;word-break:break-all;letter-spacing:-.02em}
+.stat-val.pos{color:var(--green)}
+.stat-val.neg{color:var(--red)}
+.stat-sub{font-size:.71rem;color:var(--text3);margin-top:5px}
+
+/* ── TWO-COL ── */
+.two-col{display:grid;grid-template-columns:405px 1fr;gap:20px}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:.7rem;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.form-input{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);padding:10px 13px;font-size:.875rem;
+  transition:var(--tr);outline:none;width:100%;font-family:inherit;
+}
+.form-input:focus{border-color:var(--accent);background:var(--surface3);box-shadow:0 0 0 3px rgba(124,111,255,0.13)}
+.form-input:hover:not(:focus){border-color:var(--border2)}
+.form-input::placeholder{color:var(--text3)}
+select.form-input option{background:var(--surface2);color:var(--text)}
+.sep{grid-column:1/-1;font-size:.64rem;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.1em;padding:8px 0 2px;border-bottom:1px solid rgba(124,111,255,0.14);margin-top:6px}
+
+/* ── PREVIEW BOX ── */
+.preview-box{
+  background:linear-gradient(135deg,rgba(124,111,255,0.07),rgba(124,111,255,0.02));
+  border:1px solid rgba(124,111,255,0.17);
+  border-radius:11px;padding:15px;margin-top:15px;
+}
+.preview-box-label{font-size:.64rem;color:var(--accent2);text-transform:uppercase;letter-spacing:.09em;margin-bottom:13px;font-weight:700}
+.preview-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prev-item-label{font-size:.7rem;color:var(--text3);margin-bottom:3px}
+.prev-item-val{font-size:1.06rem;font-weight:700}
+
+/* ── TABLE ── */
+.table-toolbar{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:150px}
+.search-wrap input{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);padding:8px 12px 8px 33px;
+  font-size:.84rem;width:100%;outline:none;transition:var(--tr);font-family:inherit;
+}
+.search-wrap input:focus{border-color:var(--accent);background:var(--surface3)}
+.s-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+thead tr{border-bottom:1px solid var(--border)}
+th{padding:11px 15px;text-align:left;font-size:.64rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:700;white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:var(--tr)}
+tbody tr:hover{background:rgba(124,111,255,0.04)}
+tbody tr:last-child{border-bottom:none}
+td{padding:12px 15px;vertical-align:middle}
+.td-prod{display:flex;align-items:center;gap:10px}
+.td-av{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.td-name{font-weight:600;font-size:.875rem}
+.td-sub{font-size:.7rem;color:var(--text3);margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;font-size:.7rem;font-weight:700;letter-spacing:.01em}
+.bg{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.br{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.bb{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b)}
+.by{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-b)}
+.bp{background:rgba(124,111,255,0.12);color:var(--accent2);border:1px solid rgba(124,111,255,0.22)}
+.bo{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-b)}
+.bpink{background:var(--pink-bg);color:var(--pink);border:1px solid rgba(244,114,182,0.22)}
+.act{display:flex;gap:5px}
+.empty-state{text-align:center;padding:50px 20px;color:var(--text3)}
+.e-icon{font-size:3rem;margin-bottom:13px;opacity:.3;display:block}
+.empty-state p{font-size:.875rem;line-height:1.7}
+
+/* ── TOP PRODUCTS ── */
+.top-products{display:flex;flex-direction:column;gap:8px;padding:14px}
+.tp-row{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:linear-gradient(135deg,var(--surface2),var(--surface3));
+  border-radius:11px;border:1px solid var(--border);transition:var(--tr);
+}
+.tp-row:hover{border-color:rgba(124,111,255,0.25);transform:translateX(4px)}
+.tp-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;flex-shrink:0}
+.r1{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;box-shadow:0 2px 10px rgba(245,158,11,0.45)}
+.r2{background:linear-gradient(135deg,#94a3b8,#cbd5e1);color:#000}
+.r3{background:linear-gradient(135deg,#92400e,#b45309);color:#fde68a}
+.tp-info{flex:1;min-width:0}
+.tp-name{font-weight:600;font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tp-sub{font-size:.72rem;color:var(--text3);margin-top:1px}
+.tp-profit{font-weight:700;font-size:.875rem;flex-shrink:0}
+.prog-wrap{height:4px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-top:6px}
+.prog-bar{height:100%;border-radius:99px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+
+/* ── SUMMARY ── */
+.sum-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.sum-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;transition:var(--tr)}
+.sum-item:hover{border-color:var(--border2)}
+.sum-label{font-size:.66rem;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-weight:600}
+.sum-val{font-size:.96rem;font-weight:700}
+
+/* ── ALERTS ── */
+.alert{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:10px;font-size:.83rem;margin-bottom:10px;line-height:1.5}
+.a-warn{background:var(--yellow-bg);border:1px solid var(--yellow-b);color:var(--yellow)}
+.a-info{background:var(--blue-bg);border:1px solid var(--blue-b);color:var(--blue)}
+.a-err{background:var(--red-bg);border:1px solid var(--red-b);color:var(--red)}
+.a-ok{background:var(--green-bg);border:1px solid var(--green-b);color:var(--green)}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.78);
+  backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+  z-index:200;display:flex;align-items:center;justify-content:center;
+  padding:20px;opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius);width:100%;max-width:560px;
+  max-height:90vh;overflow-y:auto;
+  transform:scale(.94) translateY(22px);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:var(--shadow-lg);position:relative;
+}
+.modal::before{
+  content:'';position:absolute;top:0;left:25%;right:25%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(124,111,255,0.6),transparent);
+}
+.modal-overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-hdr{padding:22px 24px 0;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:1rem;font-weight:700}
+.modal-cls{
+  width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;cursor:pointer;color:var(--text2);
+  display:flex;align-items:center;justify-content:center;font-size:14px;transition:var(--tr);
+}
+.modal-cls:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-b)}
+.modal-bdy{padding:20px 24px 24px}
+
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:11px 16px;font-size:.84rem;
+  display:flex;align-items:center;gap:9px;
+  box-shadow:var(--shadow);animation:tIn .35s cubic-bezier(.4,0,.2,1);
+  max-width:300px;backdrop-filter:blur(20px);
+}
+.toast.ok{border-color:var(--green-b);background:rgba(52,211,153,0.08)}
+.toast.err{border-color:var(--red-b);background:rgba(248,113,113,0.08)}
+.toast.inf{border-color:var(--blue-b);background:rgba(96,165,250,0.08)}
+@keyframes tIn{from{transform:translateX(80px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes tOut{to{transform:translateX(80px);opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .35s cubic-bezier(.4,0,.2,1) both}
+
+/* ── PROJECT CARDS ── */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.proj-card{
+  background:linear-gradient(135deg,var(--surface2),var(--surface3));
+  border:1px solid var(--border);border-radius:15px;padding:19px;
+  transition:var(--tr);position:relative;overflow:hidden;
+}
+.proj-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.proj-card.s-prep::before{background:linear-gradient(90deg,var(--blue),#818cf8)}
+.proj-card.s-cours::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.proj-card.s-term::before{background:linear-gradient(90deg,var(--green-d),var(--green))}
+.proj-card.s-susp::before{background:linear-gradient(90deg,var(--yellow),var(--orange))}
+.proj-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:var(--shadow)}
+.proj-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px}
+.proj-name{font-size:.95rem;font-weight:700;line-height:1.35;flex:1}
+.proj-desc{font-size:.78rem;color:var(--text2);margin-bottom:13px;line-height:1.55}
+.proj-meta{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:15px}
+.proj-prog-label{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text2);margin-bottom:6px}
+.proj-prog-wrap{height:8px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-bottom:9px;position:relative}
+.proj-prog-bar{
+  height:100%;border-radius:99px;
+  transition:width .9s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.proj-prog-bar::after{
+  content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);
+  animation:shimmer 2.5s infinite;
+}
+@keyframes shimmer{0%{left:-100%}100%{left:200%}}
+.proj-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:13px}
+.proj-stat{background:rgba(255,255,255,0.03);border-radius:8px;padding:8px 10px;text-align:center;border:1px solid rgba(255,255,255,0.04)}
+.proj-stat-val{font-size:.85rem;font-weight:700}
+.proj-stat-lbl{font-size:.64rem;color:var(--text3);margin-top:2px}
+.proj-actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* ── TASKS ── */
+.task-filters{display:flex;gap:7px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.task-filter-btn{
+  padding:6px 14px;border-radius:99px;font-size:.78rem;font-weight:600;
+  background:var(--surface2);color:var(--text2);border:1px solid var(--border);
+  cursor:pointer;transition:var(--tr);
+}
+.task-filter-btn:hover{background:var(--surface3);color:var(--text)}
+.task-filter-btn.active{background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;border-color:transparent;box-shadow:0 2px 10px rgba(124,111,255,0.3)}
+.task-list{display:flex;flex-direction:column;gap:8px;padding:16px}
+.task-item{
+  display:flex;align-items:flex-start;gap:12px;
+  background:linear-gradient(135deg,var(--surface2),var(--surface3));
+  border:1px solid var(--border);border-radius:11px;
+  padding:13px 15px;transition:var(--tr);
+}
+.task-item:hover{border-color:var(--border2);transform:translateX(3px)}
+.task-item.done{opacity:.5}
+.task-item.done .task-title{text-decoration:line-through;color:var(--text3)}
+.task-checkbox{
+  width:20px;height:20px;border-radius:6px;border:2px solid var(--border2);
+  background:transparent;cursor:pointer;flex-shrink:0;transition:var(--tr);
+  display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px;
+}
+.task-checkbox.checked{background:var(--green);border-color:var(--green);box-shadow:0 0 12px rgba(52,211,153,0.35)}
+.task-info{flex:1;min-width:0}
+.task-title{font-size:.875rem;font-weight:600;margin-bottom:2px}
+.task-desc{font-size:.75rem;color:var(--text3);line-height:1.5}
+.task-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.p-faible{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b)}
+.p-moyenne{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-b)}
+.p-haute{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-b)}
+.p-critique{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b);animation:bpulse 2s infinite}
+@keyframes bpulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0)}50%{box-shadow:0 0 0 4px rgba(248,113,113,0)}}
+
+/* ── REVENUE SECTION ── */
+.rev-tabs{display:flex;gap:6px;margin-bottom:22px}
+.rev-tab{
+  padding:9px 22px;border-radius:9px;cursor:pointer;font-size:.85rem;font-weight:600;
+  background:var(--surface2);color:var(--text2);border:1px solid var(--border);transition:var(--tr);
+}
+.rev-tab.active{background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(124,111,255,0.35)}
+.rev-tab:hover:not(.active){background:var(--surface3);color:var(--text)}
+.rev-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:24px}
+.rev-kpi{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:var(--tr);
+}
+.rev-kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--border2)}
+.rev-kpi-period{font-size:.67rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;font-weight:700}
+.rev-kpi-val{font-size:1.55rem;font-weight:800;letter-spacing:-.03em}
+.rev-kpi-sub{font-size:.74rem;color:var(--text3);margin-top:4px}
+.rev-kpi-icon{position:absolute;top:16px;right:16px;font-size:2rem;opacity:.12}
+.rev-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.rev-kpi.rk-w::before{background:linear-gradient(90deg,var(--blue),#818cf8)}
+.rev-kpi.rk-m::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.rev-kpi.rk-y::before{background:linear-gradient(90deg,var(--green-d),var(--green))}
+
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.pt-row{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;
+  background:var(--surface2);border-radius:10px;border:1px solid var(--border);transition:var(--tr);
+}
+.pt-row:hover{border-color:rgba(124,111,255,0.22)}
+.pt-info{flex:1;min-width:0}
+.pt-name{font-size:.875rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pt-sub{font-size:.71rem;color:var(--text3);margin-top:1px}
+.pt-pct{font-size:.86rem;font-weight:700;flex-shrink:0;color:var(--accent2)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{display:block;opacity:0;pointer-events:none;transition:opacity .3s}
+  .sidebar-overlay.open{opacity:1;pointer-events:all}
+  .main{margin-left:0}
+  .hamburger{display:flex}
+  .page{padding:16px}
+  .topbar{padding:12px 16px}
+  .dash-grid{grid-template-columns:1fr}
+}
+@media(max-width:1120px){.two-col{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .form-full,.sep{grid-column:1}
+  .proj-grid{grid-template-columns:1fr}
+  .rev-kpi-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){
+  .stats-grid{grid-template-columns:1fr}
+  .rev-kpi-grid{grid-template-columns:1fr}
+}
+/* ── SCORE DOTS ── */
+.score-criteria{display:flex;flex-direction:column;gap:12px;padding:4px 0}
+.score-row{display:flex;align-items:center;gap:10px}
+.score-lbl{font-size:.76rem;color:var(--text2);font-weight:600;flex:1;min-width:0;line-height:1.3}
+.score-lbl-sub{font-size:.63rem;color:var(--text3);display:block;margin-top:1px}
+.score-dots{display:flex;gap:5px;flex-shrink:0}
+.sdot{
+  width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);
+  background:transparent;cursor:pointer;transition:var(--tr);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;color:var(--text3);user-select:none;
+}
+.sdot:hover{border-color:var(--accent);color:var(--accent);transform:scale(1.1)}
+.sdot.on{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 0 12px var(--glow)}
+.score-total-box{
+  text-align:center;padding:14px;
+  background:linear-gradient(135deg,rgba(124,111,255,0.08),rgba(124,111,255,0.03));
+  border:1px solid rgba(124,111,255,0.15);
+  border-radius:11px;margin-top:12px;
+}
+.score-total-val{font-size:1.7rem;font-weight:800;letter-spacing:-.04em}
+.score-total-lbl{font-size:.74rem;margin-top:4px;font-weight:600}
+
+/* ── IDEA CARDS ── */
+.idea-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(305px,1fr));gap:16px}
+.idea-card{
+  background:linear-gradient(135deg,var(--surface2),var(--surface3));
+  border:1px solid var(--border);border-radius:15px;padding:18px;
+  transition:var(--tr);position:relative;overflow:hidden;
+}
+.idea-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:var(--shadow)}
+.idea-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.idea-card.sc-excellent::before{background:linear-gradient(90deg,#f97316,#ef4444)}
+.idea-card.sc-bon::before{background:linear-gradient(90deg,var(--green-d),var(--green))}
+.idea-card.sc-moyen::before{background:linear-gradient(90deg,var(--yellow),var(--orange))}
+.idea-card.sc-faible::before{background:linear-gradient(90deg,var(--text3),var(--border2))}
+.idea-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:7px}
+.idea-name{font-size:.95rem;font-weight:700;line-height:1.35;flex:1}
+.idea-notes{font-size:.78rem;color:var(--text2);margin-bottom:12px;line-height:1.6}
+.idea-score-bars{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.isb-row{display:flex;align-items:center;gap:8px}
+.isb-lbl{font-size:.65rem;color:var(--text3);width:115px;flex-shrink:0;white-space:nowrap}
+.isb-bar-wrap{flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden}
+.isb-bar{height:100%;border-radius:99px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.isb-val{font-size:.68rem;font-weight:700;width:14px;text-align:right;flex-shrink:0}
+.idea-score-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;background:rgba(255,255,255,0.03);
+  border-radius:9px;border:1px solid rgba(255,255,255,0.05);margin-bottom:12px;
+}
+.idea-score-num{font-size:1.15rem;font-weight:800}
+.idea-prices{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
+.idea-price-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center}
+.idea-price-lbl{font-size:.63rem;color:var(--text3);margin-bottom:2px}
+.idea-price-val{font-size:.88rem;font-weight:700}
+.idea-actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* ── MARKETING CARDS ── */
+.mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.mkt-card{
+  background:linear-gradient(135deg,var(--surface2),var(--surface3));
+  border:1px solid var(--border);border-radius:15px;padding:18px;
+  transition:var(--tr);position:relative;overflow:hidden;
+}
+.mkt-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:var(--shadow)}
+.mkt-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.mkt-card.ms-planned::before{background:linear-gradient(90deg,var(--blue),#818cf8)}
+.mkt-card.ms-active::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.mkt-card.ms-done::before{background:linear-gradient(90deg,var(--green-d),var(--green))}
+.mkt-card.ms-paused::before{background:linear-gradient(90deg,var(--yellow),var(--orange))}
+.mkt-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.mkt-name{font-size:.95rem;font-weight:700;line-height:1.35;flex:1}
+.mkt-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.mkt-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px}
+.mkt-kpi-item{background:rgba(255,255,255,0.03);border-radius:8px;padding:9px 10px;border:1px solid rgba(255,255,255,0.04)}
+.mkt-kpi-lbl{font-size:.63rem;color:var(--text3);margin-bottom:3px}
+.mkt-kpi-val{font-size:.86rem;font-weight:700}
+.mkt-notes-box{font-size:.78rem;color:var(--text2);line-height:1.6;padding:11px 12px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);margin-bottom:12px}
+.mkt-actions{display:flex;gap:6px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="sidebar-overlay" id="sov" onclick="closeSb()"></div>
+
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon">📦</div>
+      <div>
+        <div class="logo-title">ROI Pro</div>
+        <div class="logo-sub">Gestion E-Commerce FCFA</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-sec">Principal</div>
+    <div class="nav-item active" data-page="dashboard" onclick="nav('dashboard',this)">
+      <span class="nav-icon">🏠</span> Tableau de bord
+    </div>
+    <div class="nav-sec">Opérations</div>
+    <div class="nav-item" data-page="achats" onclick="nav('achats',this)">
+      <span class="nav-icon">🛒</span> Mes Achats
+      <span class="nav-badge" id="b-achats">0</span>
+    </div>
+    <div class="nav-item" data-page="ventes" onclick="nav('ventes',this)">
+      <span class="nav-icon">💰</span> Mes Ventes
+      <span class="nav-badge" id="b-ventes">0</span>
+    </div>
+    <div class="nav-sec">Analyse</div>
+    <div class="nav-item" data-page="rentabilite" onclick="nav('rentabilite',this)">
+      <span class="nav-icon">📊</span> Rentabilité
+    </div>
+    <div class="nav-item" data-page="produits" onclick="nav('produits',this)">
+      <span class="nav-icon">📦</span> Produits
+    </div>
+    <div class="nav-item" data-page="revenus" onclick="nav('revenus',this)">
+      <span class="nav-icon">📅</span> Revenus
+    </div>
+    <div class="nav-sec">Gestion</div>
+    <div class="nav-item" data-page="projets" onclick="nav('projets',this)">
+      <span class="nav-icon">🚀</span> Projets
+      <span class="nav-badge" id="b-projets">0</span>
+    </div>
+    <div class="nav-item" data-page="taches" onclick="nav('taches',this)">
+      <span class="nav-icon">✅</span> Tâches
+      <span class="nav-badge" id="b-taches">0</span>
+    </div>
+<div class="nav-sec">Exploration</div>
+    <div class="nav-item" data-page="idees" onclick="nav('idees',this)">
+      <span class="nav-icon">💡</span> Idées Produits
+      <span class="nav-badge" id="b-idees">0</span>
+    </div>
+    <div class="nav-item" data-page="marketing" onclick="nav('marketing',this)">
+      <span class="nav-icon">📣</span> Marketing Digital
+      <span class="nav-badge" id="b-marketing">0</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="sb-btn export" onclick="exportCSV()">📤 Exporter CSV</button>
+    <button class="sb-btn reset" onclick="confirmReset()">🗑 Réinitialiser tout</button>
+  </div>
+</aside>
+
+<!-- ════════ MAIN ════════ -->
+<div class="main">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:11px">
+    <button class="hamburger" onclick="openSb()">☰</button>
+    <div class="topbar-title" id="topTitle">🏠 Tableau de bord</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-primary btn-sm" onclick="nav('achats',null)">＋ Achat</button>
+    <button class="btn btn-success btn-sm" onclick="nav('ventes',null)">＋ Vente</button>
+  </div>
+</div>
+
+<!-- ══ PAGE: DASHBOARD ══ -->
+<div class="page active" id="page-dashboard">
+  <div class="stats-grid" id="d-stats"></div>
+  <div class="dash-grid">
+    <div class="card">
+      <div class="card-header"><div class="card-title">🏆 Top Produits Rentables</div></div>
+      <div id="d-top"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">📋 Résumé Global</div></div>
+      <div style="padding:16px"><div class="sum-row" id="d-sum"></div></div>
+    </div>
+  </div>
+  <div class="dash-grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🎯 Suivi des Projets</div>
+        <button class="btn btn-sm btn-secondary" onclick="nav('projets',null)">Voir tout →</button>
+      </div>
+      <div id="d-proj-track" style="padding:14px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">💡 Notifications</div></div>
+      <div id="d-alerts" style="padding:14px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: ACHATS ══ -->
+<div class="page" id="page-achats">
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🛒 Enregistrer un Achat</div>
+        <button class="btn btn-sm btn-secondary" onclick="clearAchat()">Effacer</button>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="sep">📦 Produit</div>
+          <div class="form-group form-full">
+            <label class="form-label">Nom du produit *</label>
+            <input class="form-input" type="text" id="a-name" placeholder="Ex: Sneakers Air Max">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantité achetée *</label>
+            <input class="form-input" type="number" id="a-qty" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Coût total stock (FCFA)</label>
+            <input class="form-input" type="number" id="a-stock" placeholder="0" min="0">
+          </div>
+          <div class="sep">🚢 Logistique</div>
+          <div class="form-group">
+            <label class="form-label">Type de fret</label>
+            <select class="form-input" id="a-fret-type">
+              <option value="Aérien">✈ Aérien</option>
+              <option value="Maritime">🚢 Maritime</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Coût fret (FCFA)</label>
+            <input class="form-input" type="number" id="a-fret" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Livraison (FCFA)</label>
+            <input class="form-input" type="number" id="a-delivery" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Douane (FCFA)</label>
+            <input class="form-input" type="number" id="a-customs" placeholder="0" min="0">
+          </div>
+          <div class="form-group form-full">
+            <label class="form-label">Emballage (FCFA)</label>
+            <input class="form-input" type="number" id="a-packaging" placeholder="0" min="0">
+          </div>
+          <div class="sep">📣 Publicité</div>
+          <div class="form-group">
+            <label class="form-label">Facebook Ads (FCFA)</label>
+            <input class="form-input" type="number" id="a-fb" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">TikTok Ads (FCFA)</label>
+            <input class="form-input" type="number" id="a-tiktok" placeholder="0" min="0">
+          </div>
+          <div class="form-group form-full">
+            <label class="form-label">Autres pubs (FCFA)</label>
+            <input class="form-input" type="number" id="a-ads" placeholder="0" min="0">
+          </div>
+          <div class="sep">💸 Frais Divers</div>
+          <div class="form-group form-full">
+            <label class="form-label">Autres frais (FCFA)</label>
+            <input class="form-input" type="number" id="a-misc" placeholder="0" min="0">
+          </div>
+        </div>
+        <div class="preview-box">
+          <div class="preview-box-label">Aperçu en temps réel</div>
+          <div class="preview-row">
+            <div>
+              <div class="prev-item-label">💼 Investissement Total</div>
+              <div class="prev-item-val" id="pa-invest" style="color:var(--accent2)">0 FCFA</div>
+            </div>
+            <div>
+              <div class="prev-item-label">📦 Coût par unité</div>
+              <div class="prev-item-val" id="pa-unit" style="color:var(--text)">—</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="saveAchat()">✚ Enregistrer l'Achat</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🗂 Produits Achetés</div>
+        <span id="a-count" style="font-size:.75rem;color:var(--text3)">0 produit(s)</span>
+      </div>
+      <div class="table-toolbar">
+        <div class="search-wrap">
+          <span class="s-icon">🔍</span>
+          <input type="text" id="a-search" placeholder="Rechercher..." oninput="renderAchats()">
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Produit</th><th>Qté</th><th>Investissement</th><th>Coût/unité</th><th>Fret</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="a-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: VENTES ══ -->
+<div class="page" id="page-ventes">
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">💰 Enregistrer une Vente</div>
+        <button class="btn btn-sm btn-secondary" onclick="clearVente()">Effacer</button>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="sep">🏷 Sélection du Produit</div>
+          <div class="form-group form-full">
+            <label class="form-label">Produit *</label>
+            <select class="form-input" id="v-product" onchange="onVenteProductChange()">
+              <option value="">— Sélectionner un produit —</option>
+            </select>
+          </div>
+          <div class="form-full" id="v-product-info" style="display:none">
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:14px;flex-wrap:wrap">
+              <div><div style="font-size:.67rem;color:var(--text3)">Investissement</div><div style="font-weight:700;color:var(--accent2);font-size:.9rem" id="vpi-invest">—</div></div>
+              <div><div style="font-size:.67rem;color:var(--text3)">Coût/unité</div><div style="font-weight:700;color:var(--text);font-size:.9rem" id="vpi-unit">—</div></div>
+              <div><div style="font-size:.67rem;color:var(--text3)">Stock acheté</div><div style="font-weight:700;color:var(--text);font-size:.9rem" id="vpi-qty">—</div></div>
+              <div><div style="font-size:.67rem;color:var(--text3)">Déjà vendu</div><div style="font-weight:700;color:var(--green);font-size:.9rem" id="vpi-sold">—</div></div>
+            </div>
+          </div>
+          <div class="sep">💳 Détails Vente</div>
+          <div class="form-group">
+            <label class="form-label">Prix unitaire (FCFA) *</label>
+            <input class="form-input" type="number" id="v-price" placeholder="0" min="0" oninput="updateVPrev()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantité vendue *</label>
+            <input class="form-input" type="number" id="v-qty" placeholder="0" min="0" oninput="updateVPrev()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date de vente</label>
+            <input class="form-input" type="date" id="v-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Canal de vente</label>
+            <select class="form-input" id="v-channel">
+              <option value="WhatsApp">📱 WhatsApp</option>
+              <option value="Facebook">📘 Facebook</option>
+              <option value="TikTok">🎵 TikTok</option>
+              <option value="Instagram">📸 Instagram</option>
+              <option value="Boutique">🏪 Boutique</option>
+              <option value="Site web">🌐 Site web</option>
+              <option value="Autre">📦 Autre</option>
+            </select>
+          </div>
+          <div class="form-group form-full">
+            <label class="form-label">Note (optionnel)</label>
+            <input class="form-input" type="text" id="v-note" placeholder="Ex: Client fidèle, livraison express...">
+          </div>
+        </div>
+        <div class="preview-box">
+          <div class="preview-box-label">Aperçu de la vente</div>
+          <div class="preview-row">
+            <div>
+              <div class="prev-item-label">💰 Chiffre d'Affaires</div>
+              <div class="prev-item-val" id="pv-ca" style="color:var(--blue)">0 FCFA</div>
+            </div>
+            <div>
+              <div class="prev-item-label">📈 Profit estimé (cumulé)</div>
+              <div class="prev-item-val" id="pv-profit">—</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="saveVente()">✚ Enregistrer la Vente</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 Historique des Ventes</div>
+        <span id="v-count" style="font-size:.75rem;color:var(--text3)">0 vente(s)</span>
+      </div>
+      <div class="table-toolbar">
+        <div class="search-wrap">
+          <span class="s-icon">🔍</span>
+          <input type="text" id="v-search" placeholder="Rechercher..." oninput="renderVentes()">
+        </div>
+        <select class="form-input" id="v-filter" style="width:auto;padding:7px 10px;font-size:.82rem" onchange="renderVentes()">
+          <option value="">Tous les produits</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Produit</th><th>Prix/unité</th><th>Qté</th><th>CA</th><th>Canal</th><th>Date</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="v-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: RENTABILITÉ ══ -->
+<div class="page" id="page-rentabilite">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📊 Analyse de Rentabilité par Produit</div>
+      <div style="display:flex;gap:7px">
+        <button class="btn btn-sm btn-primary" id="rs-profit" onclick="sortRent('profit')">📈 Profit</button>
+        <button class="btn btn-sm btn-secondary" id="rs-roi" onclick="sortRent('roi')">🔁 ROI</button>
+        <button class="btn btn-sm btn-secondary" id="rs-ca" onclick="sortRent('ca')">💰 CA</button>
+      </div>
+    </div>
+    <div class="table-toolbar">
+      <div class="search-wrap">
+        <span class="s-icon">🔍</span>
+        <input type="text" id="r-search" placeholder="Rechercher un produit..." oninput="renderRent()">
+      </div>
+      <span id="r-count" style="font-size:.75rem;color:var(--text3);margin-left:auto"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Produit</th><th>Investissement</th><th>CA</th><th>Coût/unité</th><th>Profit / Perte</th><th>Marge</th><th>ROI</th><th>Ventes</th><th>Statut</th>
+        </tr></thead>
+        <tbody id="r-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: PRODUITS ══ -->
+<div class="page" id="page-produits">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📦 Inventaire Produits</div>
+      <span id="prod-count" style="font-size:.75rem;color:var(--text3)">0 produit(s)</span>
+    </div>
+    <div class="table-toolbar">
+      <div class="search-wrap">
+        <span class="s-icon">🔍</span>
+        <input type="text" id="prod-search" placeholder="Rechercher un produit..." oninput="renderProducts()">
+      </div>
+      <select class="form-input" id="prod-sort" style="width:auto;padding:7px 10px;font-size:.82rem" onchange="renderProducts()">
+        <option value="name">Nom</option>
+        <option value="stock">Stock</option>
+        <option value="invest">Investissement</option>
+        <option value="profit">Profit</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Produit</th><th>Qté Achetée</th><th>Qté Vendue</th><th>Stock Restant</th><th>Coût/unité</th><th>Investissement</th><th>CA</th><th>Profit</th><th>Statut Stock</th>
+        </tr></thead>
+        <tbody id="prod-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: PROJETS ══ -->
+<div class="page" id="page-projets">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:3px">🚀 Mes Projets</h2>
+      <p style="font-size:.8rem;color:var(--text3)" id="proj-count-lbl">0 projet(s)</p>
+    </div>
+    <button class="btn btn-primary" onclick="openProjectModal()">＋ Nouveau Projet</button>
+  </div>
+  <div style="display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap" id="proj-status-filters">
+    <button class="task-filter-btn active" data-status="" onclick="filterProjets(this,'')">Tous</button>
+    <button class="task-filter-btn" data-status="prep" onclick="filterProjets(this,'prep')">🔵 En préparation</button>
+    <button class="task-filter-btn" data-status="cours" onclick="filterProjets(this,'cours')">🟣 En cours</button>
+    <button class="task-filter-btn" data-status="term" onclick="filterProjets(this,'term')">🟢 Terminé</button>
+    <button class="task-filter-btn" data-status="susp" onclick="filterProjets(this,'susp')">🟡 Suspendu</button>
+  </div>
+  <div class="proj-grid" id="proj-grid"></div>
+</div>
+
+<!-- ══ PAGE: TÂCHES ══ -->
+<div class="page" id="page-taches">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:3px">✅ Mes Tâches</h2>
+      <p style="font-size:.8rem;color:var(--text3)" id="task-count-lbl">0 tâche(s)</p>
+    </div>
+    <button class="btn btn-primary" onclick="openTaskModal()">＋ Nouvelle Tâche</button>
+  </div>
+  <div class="card">
+    <div class="task-filters" id="task-filters">
+      <button class="task-filter-btn active" data-filter="" onclick="filterTasks(this,'')">Toutes</button>
+      <button class="task-filter-btn" data-filter="todo" onclick="filterTasks(this,'todo')">📋 À faire</button>
+      <button class="task-filter-btn" data-filter="doing" onclick="filterTasks(this,'doing')">⚡ En cours</button>
+      <button class="task-filter-btn" data-filter="done" onclick="filterTasks(this,'done')">✅ Terminées</button>
+      <button class="task-filter-btn" data-filter="critique" onclick="filterTasks(this,'critique')">🔴 Critiques</button>
+    </div>
+    <div id="task-list-wrap"></div>
+  </div>
+</div>
+
+<!-- ══ PAGE: REVENUS ══ -->
+<div class="page" id="page-revenus">
+  <div style="margin-bottom:22px">
+    <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:3px">📅 Analyse des Revenus</h2>
+    <p style="font-size:.8rem;color:var(--text3)">Suivi de vos gains sur tous vos projets et produits</p>
+  </div>
+  <div class="rev-kpi-grid">
+    <div class="rev-kpi rk-w">
+      <div class="rev-kpi-period">📅 Cette Semaine</div>
+      <div class="rev-kpi-val" id="rev-week-ca" style="color:var(--blue)">0 FCFA</div>
+      <div class="rev-kpi-sub" id="rev-week-sub">0 vente(s)</div>
+      <div class="rev-kpi-icon">📅</div>
+    </div>
+    <div class="rev-kpi rk-m">
+      <div class="rev-kpi-period">🗓 Ce Mois</div>
+      <div class="rev-kpi-val" id="rev-month-ca" style="color:var(--accent2)">0 FCFA</div>
+      <div class="rev-kpi-sub" id="rev-month-sub">0 vente(s)</div>
+      <div class="rev-kpi-icon">🗓</div>
+    </div>
+    <div class="rev-kpi rk-y">
+      <div class="rev-kpi-period">📆 Cette Année</div>
+      <div class="rev-kpi-val" id="rev-year-ca" style="color:var(--green)">0 FCFA</div>
+      <div class="rev-kpi-sub" id="rev-year-sub">0 vente(s)</div>
+      <div class="rev-kpi-icon">📆</div>
+    </div>
+    <div class="rev-kpi" style="border-color:rgba(251,191,36,0.15)">
+      <div class="rev-kpi-period" style="color:var(--text2)">🔄 Moyenne / Mois</div>
+      <div class="rev-kpi-val" id="rev-avg-ca" style="color:var(--yellow)">0 FCFA</div>
+      <div class="rev-kpi-sub" id="rev-avg-sub">Sur l'historique total</div>
+      <div class="rev-kpi-icon">🔄</div>
+    </div>
+  </div>
+  <div class="rev-tabs">
+    <button class="rev-tab active" onclick="switchRevTab(this,'week')">📅 Semaine</button>
+    <button class="rev-tab" onclick="switchRevTab(this,'month')">🗓 Mois</button>
+    <button class="rev-tab" onclick="switchRevTab(this,'year')">📆 Année</button>
+    <button class="rev-tab" onclick="switchRevTab(this,'all')">📊 Tout</button>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title" id="rev-table-title">📊 Ventes de la semaine</div>
+      <span id="rev-table-count" style="font-size:.75rem;color:var(--text3)"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Produit</th><th>Prix/unité</th><th>Qté</th><th>CA</th><th>Profit</th><th>Canal</th><th>Date</th>
+        </tr></thead>
+        <tbody id="rev-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div style="margin-top:20px" class="card">
+    <div class="card-header"><div class="card-title">📦 Revenus par Produit (période)</div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Produit</th><th>Ventes</th><th>Qté Vendue</th><th>CA Période</th><th>Profit Période</th><th>% du Total</th>
+        </tr></thead>
+        <tbody id="rev-prod-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══ PAGE: IDÉES PRODUITS ══ -->
+<div class="page" id="page-idees">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:3px">💡 Idées Produits</h2>
+      <p style="font-size:.8rem;color:var(--text3)" id="idees-count-lbl">0 idée(s)</p>
+    </div>
+    <button class="btn btn-primary" onclick="openIdeaModal()">＋ Nouvelle Idée</button>
+  </div>
+  <div class="stats-grid" id="idees-stats" style="margin-bottom:22px"></div>
+  <div style="display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap;align-items:center" id="idea-status-filters">
+    <button class="task-filter-btn active" data-status="" onclick="filterIdeas(this,'')">Toutes</button>
+    <button class="task-filter-btn" data-status="idea" onclick="filterIdeas(this,'idea')">💡 Idées</button>
+    <button class="task-filter-btn" data-status="research" onclick="filterIdeas(this,'research')">🔍 En recherche</button>
+    <button class="task-filter-btn" data-status="validated" onclick="filterIdeas(this,'validated')">✅ Validées</button>
+    <button class="task-filter-btn" data-status="rejected" onclick="filterIdeas(this,'rejected')">❌ Écartées</button>
+    <div class="search-wrap" style="flex:1;min-width:160px;margin-left:8px">
+      <span class="s-icon">🔍</span>
+      <input type="text" id="ideas-search" placeholder="Rechercher..." oninput="renderIdeas()">
+    </div>
+  </div>
+  <div class="idea-grid" id="ideas-grid"></div>
+</div>
+
+<!-- ══ PAGE: MARKETING DIGITAL ══ -->
+<div class="page" id="page-marketing">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:3px">📣 Marketing Digital</h2>
+      <p style="font-size:.8rem;color:var(--text3)" id="mkt-count-lbl">0 stratégie(s)</p>
+    </div>
+    <button class="btn btn-primary" onclick="openMktModal()">＋ Nouvelle Stratégie</button>
+  </div>
+  <div class="stats-grid" id="mkt-stats" style="margin-bottom:22px"></div>
+  <div style="display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap" id="mkt-status-filters">
+    <button class="task-filter-btn active" data-status="" onclick="filterMkt(this,'')">Toutes</button>
+    <button class="task-filter-btn" data-status="planned" onclick="filterMkt(this,'planned')">📋 Planifiées</button>
+    <button class="task-filter-btn" data-status="active" onclick="filterMkt(this,'active')">🚀 Actives</button>
+    <button class="task-filter-btn" data-status="done" onclick="filterMkt(this,'done')">✅ Terminées</button>
+    <button class="task-filter-btn" data-status="paused" onclick="filterMkt(this,'paused')">⏸ Pausées</button>
+  </div>
+  <div class="mkt-grid" id="mkt-grid"></div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ MODAL: EDIT ACHAT ══ -->
+<div class="modal-overlay" id="editModal" onclick="closeEdit(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">✏️ Modifier l'Achat</div>
+      <button class="modal-cls" onclick="closeEdit()">✕</button>
+    </div>
+    <div class="modal-bdy" id="editBody"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: PROJET ══ -->
+<div class="modal-overlay" id="projectModal" onclick="closeProjectModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="proj-modal-title">🚀 Nouveau Projet</div>
+      <button class="modal-cls" onclick="closeProjectModal()">✕</button>
+    </div>
+    <div class="modal-bdy">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Nom du projet *</label>
+          <input class="form-input" type="text" id="pm-name" placeholder="Ex: Campagne Sneakers Été 2026">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Description</label>
+          <input class="form-input" type="text" id="pm-desc" placeholder="Description courte du projet...">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Produit associé</label>
+          <select class="form-input" id="pm-product">
+            <option value="">— Aucun produit —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantité cible</label>
+          <input class="form-input" type="number" id="pm-target" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select class="form-input" id="pm-status">
+            <option value="prep">🔵 En préparation</option>
+            <option value="cours">🟣 En cours</option>
+            <option value="term">🟢 Terminé</option>
+            <option value="susp">🟡 Suspendu</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date de début</label>
+          <input class="form-input" type="date" id="pm-start">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date de fin</label>
+          <input class="form-input" type="date" id="pm-end">
+        </div>
+      </div>
+      <div style="display:flex;gap:9px;margin-top:18px">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeProjectModal()">Annuler</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveProject()">💾 Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: TÂCHE ══ -->
+<div class="modal-overlay" id="taskModal" onclick="closeTaskModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="task-modal-title">✅ Nouvelle Tâche</div>
+      <button class="modal-cls" onclick="closeTaskModal()">✕</button>
+    </div>
+    <div class="modal-bdy">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Titre de la tâche *</label>
+          <input class="form-input" type="text" id="tm-title" placeholder="Ex: Contacter fournisseur...">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Description</label>
+          <input class="form-input" type="text" id="tm-desc" placeholder="Détails de la tâche...">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Projet associé</label>
+          <select class="form-input" id="tm-project">
+            <option value="">— Aucun projet —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priorité</label>
+          <select class="form-input" id="tm-priority">
+            <option value="faible">🔵 Faible</option>
+            <option value="moyenne">🟡 Moyenne</option>
+            <option value="haute">🟠 Haute</option>
+            <option value="critique">🔴 Critique</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select class="form-input" id="tm-status">
+            <option value="todo">📋 À faire</option>
+            <option value="doing">⚡ En cours</option>
+            <option value="done">✅ Terminée</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:9px;margin-top:18px">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeTaskModal()">Annuler</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveTask()">💾 Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══ MODAL: IDÉE PRODUIT ══ -->
+<div class="modal-overlay" id="ideaModal" onclick="closeIdeaModal(event)">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-hdr">
+      <div class="modal-title" id="idea-modal-title">💡 Nouvelle Idée Produit</div>
+      <button class="modal-cls" onclick="closeIdeaModal()">✕</button>
+    </div>
+    <div class="modal-bdy">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Nom du produit / idée *</label>
+          <input class="form-input" type="text" id="im-name" placeholder="Ex: Lampe LED magnétique USB">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Notes & Observations</label>
+          <textarea class="form-input" id="im-notes" rows="3" placeholder="Détails, source d'inspiration, concurrents observés..." style="resize:vertical;font-family:inherit"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catégorie</label>
+          <input class="form-input" type="text" id="im-category" placeholder="Ex: Tech, Mode, Beauté...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select class="form-input" id="im-status">
+            <option value="idea">💡 Idée</option>
+            <option value="research">🔍 En recherche</option>
+            <option value="validated">✅ Validé</option>
+            <option value="rejected">❌ Écarté</option>
+          </select>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Lien de référence (AliExpress, Amazon, TikTok...)</label>
+          <input class="form-input" type="url" id="im-ref" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Coût fournisseur estimé (FCFA)</label>
+          <input class="form-input" type="number" id="im-cost" placeholder="0" min="0" oninput="updateIdeaMarginPreview()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prix de vente estimé (FCFA)</label>
+          <input class="form-input" type="number" id="im-price" placeholder="0" min="0" oninput="updateIdeaMarginPreview()">
+        </div>
+        <div class="form-full" id="im-margin-preview" style="display:none">
+          <div style="background:linear-gradient(135deg,rgba(52,211,153,0.08),rgba(52,211,153,0.03));border:1px solid var(--green-b);border-radius:9px;padding:10px 14px;display:flex;gap:18px;flex-wrap:wrap">
+            <div><div style="font-size:.67rem;color:var(--text3)">Marge brute</div><div style="font-weight:700;color:var(--green);font-size:.92rem" id="im-margin-pct">—</div></div>
+            <div><div style="font-size:.67rem;color:var(--text3)">Profit/unité</div><div style="font-weight:700;color:var(--green);font-size:.92rem" id="im-margin-val">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scoring section -->
+      <div style="margin-top:18px;padding:16px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:.69rem;color:var(--accent2);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:15px;display:flex;align-items:center;gap:7px">
+          🎯 Scoring Potentiel Produit
+          <span style="font-size:.65rem;color:var(--text3);font-weight:500;text-transform:none;letter-spacing:0">(cliquez pour noter de 1 à 5)</span>
+        </div>
+        <div class="score-criteria" id="score-criteria"></div>
+        <div class="score-total-box" id="score-total-display">
+          <div class="score-total-val" id="score-total-val" style="color:var(--text3)">0 / 25</div>
+          <div class="score-total-lbl" id="score-total-badge" style="color:var(--text3)">Aucun score — cliquez les critères</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:9px;margin-top:18px">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeIdeaModal()">Annuler</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveIdea()">💾 Sauvegarder l'Idée</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: STRATÉGIE MARKETING ══ -->
+<div class="modal-overlay" id="mktModal" onclick="closeMktModal(event)">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-hdr">
+      <div class="modal-title" id="mkt-modal-title">📣 Nouvelle Stratégie Marketing</div>
+      <button class="modal-cls" onclick="closeMktModal()">✕</button>
+    </div>
+    <div class="modal-bdy">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Nom de la stratégie *</label>
+          <input class="form-input" type="text" id="mm-name" placeholder="Ex: Campagne TikTok Été 2026">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Produit / Projet associé</label>
+          <select class="form-input" id="mm-product">
+            <option value="">— Aucun —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Canal principal</label>
+          <select class="form-input" id="mm-channel">
+            <option value="Facebook Ads">📘 Facebook Ads</option>
+            <option value="TikTok Ads">🎵 TikTok Ads</option>
+            <option value="TikTok Organique">🎵 TikTok Organique</option>
+            <option value="Instagram Ads">📸 Instagram Ads</option>
+            <option value="Instagram Organique">📸 Instagram Organique</option>
+            <option value="WhatsApp">📱 WhatsApp</option>
+            <option value="Influenceur">🌟 Influenceur</option>
+            <option value="Email Marketing">📧 Email Marketing</option>
+            <option value="SEO / Blog">🔍 SEO / Blog</option>
+            <option value="YouTube">▶️ YouTube</option>
+            <option value="Bouche à oreille">🗣 Bouche à oreille</option>
+            <option value="Autre">📦 Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Objectif principal</label>
+          <select class="form-input" id="mm-objective">
+            <option value="Ventes">💰 Ventes directes</option>
+            <option value="Notoriété">👁 Notoriété</option>
+            <option value="Trafic">🚦 Trafic</option>
+            <option value="Leads">📋 Génération de leads</option>
+            <option value="Fidélisation">❤️ Fidélisation</option>
+            <option value="Lancement">🚀 Lancement produit</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Budget alloué (FCFA)</label>
+          <input class="form-input" type="number" id="mm-budget" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select class="form-input" id="mm-status">
+            <option value="planned">📋 Planifiée</option>
+            <option value="active">🚀 Active</option>
+            <option value="done">✅ Terminée</option>
+            <option value="paused">⏸ Pausée</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date de début</label>
+          <input class="form-input" type="date" id="mm-start">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date de fin prévue</label>
+          <input class="form-input" type="date" id="mm-end">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">👥 Cible / Audience</label>
+          <input class="form-input" type="text" id="mm-audience" placeholder="Ex: Femmes 25-40 ans, urbaines, intéressées par la beauté">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">📝 Tactiques & Notes stratégiques</label>
+          <textarea class="form-input" id="mm-notes" rows="4" placeholder="Décrivez vos tactiques, accroches, formats de contenu, KPIs visés, messages clés..." style="resize:vertical;font-family:inherit"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:9px;margin-top:18px">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeMktModal()">Annuler</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveMkt()">💾 Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<script>
+/* ================================================
+   ROI CALCULATOR PRO — FCFA  v2.0
+   ================================================ */
+
+// ── STATE ──
+let products = JSON.parse(localStorage.getItem('rp2_products') || '[]');
+let sales    = JSON.parse(localStorage.getItem('rp2_sales')    || '[]');
+let projects = JSON.parse(localStorage.getItem('rp2_projects') || '[]');
+let tasks    = JSON.parse(localStorage.getItem('rp2_tasks')    || '[]');
+let rSort    = { field:'profit', dir:1 };
+let editId   = null;
+let editProjId = null;
+let editTaskId = null;
+let projFilter = '';
+let taskFilter = '';
+let revTab     = 'week';
+
+// ── UTILS ──
+const uid     = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const $       = id => document.getElementById(id);
+const num     = id => parseFloat($( id)?.value) || 0;
+const str     = id => $( id)?.value?.trim() || '';
+const today   = () => new Date().toISOString().split('T')[0];
+const esc     = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtDate = d => { if(!d) return '—'; const [y,m,dd]=d.split('-'); return `${dd}/${m}/${y}`; };
+
+function fF(v) {
+  if(v===null||v===undefined||isNaN(v)) return '—';
+  return Math.round(v).toLocaleString('fr-FR') + ' FCFA';
+}
+function fP(v) {
+  if(isNaN(v)) return '—';
+  return (v>=0?'+':'')+v.toFixed(1)+' %';
+}
+function avColor(name) {
+  const c=['#7c6fff','#3b82f6','#34d399','#fbbf24','#f87171','#ec4899','#a78bfa','#14b8a6','#fb923c','#06b6d4'];
+  let h=0; for(const ch of (name||'')) h=(h*31+ch.charCodeAt(0))&0xffffffff;
+  return c[Math.abs(h)%c.length];
+}
+const chIcons = { WhatsApp:'📱', Facebook:'📘', TikTok:'🎵', Instagram:'📸', Boutique:'🏪', 'Site web':'🌐', Autre:'📦' };
+const statusLabels = { prep:'🔵 En préparation', cours:'🟣 En cours', term:'🟢 Terminé', susp:'🟡 Suspendu' };
+const statusBadge  = { prep:'bb', cours:'bp', term:'bg', susp:'by' };
+const prioLabels   = { faible:'🔵 Faible', moyenne:'🟡 Moyenne', haute:'🟠 Haute', critique:'🔴 Critique' };
+const prioBadge    = { faible:'bb p-faible', moyenne:'by p-moyenne', haute:'bo p-haute', critique:'br p-critique' };
+const taskStatusLabel = { todo:'📋 À faire', doing:'⚡ En cours', done:'✅ Terminée' };
+
+// ── ENGINE ──
+function computeInvest(p) {
+  return (p.stock||0)+(p.fret||0)+(p.delivery||0)+(p.customs||0)+
+         (p.packaging||0)+(p.fb||0)+(p.tiktok||0)+(p.ads||0)+(p.misc||0);
+}
+function getStats(pid) {
+  const p = products.find(x=>x.id===pid);
+  if(!p) return null;
+  const pSales = sales.filter(s=>s.productId===pid);
+  const invest = computeInvest(p);
+  const ca     = pSales.reduce((s,v)=>s+v.price*v.qty, 0);
+  const profit = ca - invest;
+  const margin = ca>0 ? (profit/ca)*100 : 0;
+  const roi    = invest>0 ? (profit/invest)*100 : 0;
+  const unit   = (p.qty||1)>0 ? invest/p.qty : 0;
+  const sold   = pSales.reduce((s,v)=>s+v.qty, 0);
+  return { invest, ca, profit, margin, roi, unit, sold, nSales:pSales.length };
+}
+function getProjectProgress(proj) {
+  if(!proj.productId || !proj.targetQty) return 0;
+  const s = getStats(proj.productId);
+  if(!s) return 0;
+  return Math.min(100, Math.round((s.sold / proj.targetQty) * 100));
+}
+
+// ── SAVE ──
+function save() {
+  localStorage.setItem('rp2_products', JSON.stringify(products));
+  localStorage.setItem('rp2_sales',    JSON.stringify(sales));
+}
+function saveProjects() {
+  localStorage.setItem('rp2_projects', JSON.stringify(projects));
+}
+function saveTasks() {
+  localStorage.setItem('rp2_tasks', JSON.stringify(tasks));
+}
+
+// ── BADGES ──
+function badges() {
+  $('b-achats').textContent  = products.length;
+  $('b-ventes').textContent  = sales.length;
+  $('b-projets').textContent = projects.length;
+  $('b-taches').textContent  = tasks.filter(t=>t.status!=='done').length;
+ $('b-idees').textContent  = ideas.length;
+  $('b-marketing').textContent = marketing.filter(x=>x.status==='active').length;
+}
+
+// ── NAV ──
+const pageTitles = {
+  dashboard: '🏠 Tableau de bord',
+  achats: '🛒 Mes Achats',
+  ventes: '💰 Mes Ventes',
+  rentabilite: '📊 Rentabilité',
+  produits: '📦 Produits',
+  projets: '🚀 Projets',
+  taches: '✅ Tâches',
+  revenus: '📅 Revenus',
+  idees: '💡 Idées Produits',
+  marketing: '📣 Marketing Digital',
+};
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  $('page-'+page)?.classList.add('active');
+  (el || document.querySelector(`[data-page="${page}"]`))?.classList.add('active');
+  $('topTitle').textContent = pageTitles[page] || page;
+  closeSb();
+  const renders = {
+  dashboard: renderDash,
+  achats: renderAchats,
+  rentabilite: renderRent,
+  produits: renderProducts,
+  projets: renderProjects,
+  taches: renderTasks,
+  revenus: renderRevenus,
+  idees: renderIdeas,
+  marketing: renderMarketing,
+};
+  if(page==='ventes') { populateProdSelect(); renderVentes(); }
+  else if(renders[page]) renders[page]();
+}
+function openSb()  { $('sidebar').classList.add('open');    $('sov').classList.add('open'); }
+function closeSb() { $('sidebar').classList.remove('open'); $('sov').classList.remove('open'); }
+
+// ── LIVE PREVIEW — ACHATS ──
+function updateAPrev() {
+  const p = {
+    stock:num('a-stock'), fret:num('a-fret'), delivery:num('a-delivery'),
+    customs:num('a-customs'), packaging:num('a-packaging'),
+    fb:num('a-fb'), tiktok:num('a-tiktok'), ads:num('a-ads'), misc:num('a-misc'),
+    qty:num('a-qty')
+  };
+  const inv = computeInvest(p);
+  $('pa-invest').textContent = fF(inv);
+  $('pa-unit').textContent   = p.qty>0 ? fF(inv/p.qty) : '—';
+}
+['a-stock','a-fret','a-delivery','a-customs','a-packaging','a-fb','a-tiktok','a-ads','a-misc','a-qty']
+  .forEach(id=>{ setTimeout(()=>{ const el=$(id); if(el) el.addEventListener('input',updateAPrev); },0); });
+
+// ── ACHAT: SAVE ──
+function saveAchat() {
+  const name = str('a-name');
+  if(!name)            { toast('⚠️ Nom du produit requis.','err'); return; }
+  if(num('a-qty')<=0)  { toast('⚠️ Quantité achetée requise.','err'); return; }
+  products.push({
+    id:uid(), name, qty:num('a-qty'),
+    stock:num('a-stock'), fretType:str('a-fret-type'), fret:num('a-fret'),
+    delivery:num('a-delivery'), customs:num('a-customs'), packaging:num('a-packaging'),
+    fb:num('a-fb'), tiktok:num('a-tiktok'), ads:num('a-ads'), misc:num('a-misc'),
+    createdAt: new Date().toISOString()
+  });
+  save(); badges(); renderAchats();
+  clearAchat();
+  toast(`✅ "${name}" ajouté aux achats !`,'ok');
+  checkNotifications();
+}
+function clearAchat() {
+  ['a-name','a-qty','a-stock','a-fret','a-delivery','a-customs','a-packaging','a-fb','a-tiktok','a-ads','a-misc']
+    .forEach(id=>{ const el=$(id); if(el) el.value=''; });
+  updateAPrev();
+}
+
+// ── ACHATS: RENDER ──
+function renderAchats() {
+  const q = ($('a-search')?.value||'').toLowerCase();
+  const list = products.filter(p=>!q||p.name.toLowerCase().includes(q));
+  $('a-count').textContent = `${products.length} produit(s)`;
+  const tbody = $('a-tbody');
+  if(!list.length) {
+    tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state"><span class="e-icon">🛒</span><p>${q?'Aucun résultat.':'Aucun achat enregistré.<br>Remplissez le formulaire à gauche.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map((p,i)=>{
+    const inv  = computeInvest(p);
+    const unit = p.qty>0 ? inv/p.qty : 0;
+    const col  = avColor(p.name);
+    const ns   = sales.filter(s=>s.productId===p.id).length;
+    return `<tr class="anim" style="animation-delay:${i*.03}s">
+      <td><div class="td-prod">
+        <div class="td-av" style="background:${col}22;color:${col}">${p.name[0].toUpperCase()}</div>
+        <div><div class="td-name">${esc(p.name)}</div>
+        <div class="td-sub">${ns} vente(s) · ${fmtDate(p.createdAt?.split('T')[0])}</div></div>
+      </div></td>
+      <td>${(p.qty||0).toLocaleString('fr-FR')}</td>
+      <td style="color:var(--accent2);font-weight:600">${fF(inv)}</td>
+      <td style="color:var(--text2)">${fF(unit)}</td>
+      <td><span class="badge bb">${esc(p.fretType||'Aérien')}</span></td>
+      <td><div class="act">
+        <button class="btn btn-sm btn-secondary btn-icon" title="Modifier" onclick="openEdit('${p.id}')">✏️</button>
+        <button class="btn btn-sm btn-danger btn-icon" title="Supprimer" onclick="delAchat('${p.id}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function delAchat(id) {
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  if(!confirm(`Supprimer "${p.name}" et toutes ses ventes ?`)) return;
+  products = products.filter(x=>x.id!==id);
+  sales    = sales.filter(s=>s.productId!==id);
+  save(); badges(); renderAchats(); renderDash();
+  toast(`🗑 "${p.name}" supprimé.`,'inf');
+}
+
+// ── EDIT ACHAT MODAL ──
+function openEdit(id) {
+  editId = id;
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  const fields = [
+    {k:'name',    lb:'Nom du produit',      t:'text',  full:true},
+    {k:'qty',     lb:'Quantité achetée',     t:'number'},
+    {k:'stock',   lb:'Coût stock (FCFA)',    t:'number'},
+    {k:'fret',    lb:'Fret (FCFA)',          t:'number'},
+    {k:'delivery',lb:'Livraison (FCFA)',     t:'number'},
+    {k:'customs', lb:'Douane (FCFA)',        t:'number'},
+    {k:'packaging',lb:'Emballage (FCFA)',    t:'number'},
+    {k:'fb',      lb:'Facebook Ads',         t:'number'},
+    {k:'tiktok',  lb:'TikTok Ads',           t:'number'},
+    {k:'ads',     lb:'Autres pubs',          t:'number'},
+    {k:'misc',    lb:'Autres frais',         t:'number', full:true}
+  ];
+  $('editBody').innerHTML = `
+    <div class="form-grid">
+      ${fields.map(f=>`
+        <div class="form-group${f.full?' form-full':''}">
+          <label class="form-label">${f.lb}</label>
+          <input type="${f.t}" class="form-input" id="em-${f.k}"
+            value="${esc(String(p[f.k]??''))}" ${f.t==='number'?'min="0"':''}>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:9px;margin-top:18px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeEdit()">Annuler</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveEdit()">💾 Sauvegarder</button>
+    </div>`;
+  $('editModal').classList.add('open');
+}
+function closeEdit(e) {
+  if(e && e.target !== $('editModal')) return;
+  $('editModal').classList.remove('open'); editId=null;
+}
+function saveEdit() {
+  if(!editId) return;
+  const idx = products.findIndex(x=>x.id===editId);
+  if(idx===-1) return;
+  ['qty','stock','fret','delivery','customs','packaging','fb','tiktok','ads','misc']
+    .forEach(k=>{ const el=$(`em-${k}`); if(el) products[idx][k]=parseFloat(el.value)||0; });
+  const nm=$('em-name');
+  if(nm?.value.trim()) products[idx].name=nm.value.trim();
+  save(); renderAchats(); renderRent(); renderDash(); renderProducts();
+  $('editModal').classList.remove('open'); editId=null;
+  toast(`✏️ "${products[idx].name}" mis à jour !`,'ok');
+}
+
+// ── VENTES ──
+function populateProdSelect() {
+  const sel=$('v-product');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— Sélectionner un produit —</option>'+
+    products.map(p=>`<option value="${p.id}"${p.id===cur?' selected':''}>${esc(p.name)}</option>`).join('');
+  const fsel=$('v-filter');
+  if(fsel) {
+    const fc=fsel.value;
+    fsel.innerHTML='<option value="">Tous les produits</option>'+
+      products.map(p=>`<option value="${p.id}"${p.id===fc?' selected':''}>${esc(p.name)}</option>`).join('');
+  }
+}
+function onVenteProductChange() {
+  const pid=str('v-product'), info=$('v-product-info');
+  if(!pid){ info.style.display='none'; return; }
+  const s=getStats(pid), p=products.find(x=>x.id===pid);
+  if(s&&p){
+    $('vpi-invest').textContent=fF(s.invest);
+    $('vpi-unit').textContent=fF(s.unit);
+    $('vpi-qty').textContent=(p.qty||0).toLocaleString('fr-FR');
+    $('vpi-sold').textContent=s.sold.toLocaleString('fr-FR');
+    info.style.display='block';
+  }
+  updateVPrev();
+}
+function updateVPrev() {
+  const price=num('v-price'), qty=num('v-qty'), ca=price*qty;
+  $('pv-ca').textContent=fF(ca);
+  const pid=str('v-product'), el=$('pv-profit');
+  if(pid){ const s=getStats(pid); if(s){ const fp=s.ca+ca-s.invest; el.textContent=fF(fp); el.style.color=fp>=0?'var(--green)':'var(--red)'; } }
+  else { el.textContent='—'; el.style.color=''; }
+}
+function saveVente() {
+  const pid=str('v-product');
+  if(!pid)           { toast('⚠️ Sélectionnez un produit.','err'); return; }
+  if(num('v-price')<=0){ toast('⚠️ Prix de vente requis.','err'); return; }
+  if(num('v-qty')<=0)  { toast('⚠️ Quantité vendue requise.','err'); return; }
+  const p=products.find(x=>x.id===pid);
+  sales.push({
+    id:uid(), productId:pid,
+    price:num('v-price'), qty:num('v-qty'),
+    channel:str('v-channel'),
+    date:str('v-date')||today(),
+    note:str('v-note'),
+    createdAt:new Date().toISOString()
+  });
+  save(); badges(); renderVentes(); renderDash(); renderProjects(); renderProducts();
+  clearVente(); onVenteProductChange();
+  toast(`✅ Vente enregistrée pour "${p?.name}" !`,'ok');
+  checkNotifications();
+}
+function clearVente() {
+  ['v-price','v-qty','v-note'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
+  $('v-date').value=today();
+  $('pv-ca').textContent='0 FCFA';
+  $('pv-profit').textContent='—'; $('pv-profit').style.color='';
+}
+function delVente(id) {
+  const v=sales.find(x=>x.id===id);
+  if(!v) return;
+  const p=products.find(x=>x.id===v.productId);
+  if(!confirm(`Supprimer cette vente de "${p?.name||'?'}" ?`)) return;
+  sales=sales.filter(x=>x.id!==id);
+  save(); badges(); renderVentes(); renderDash(); renderProjects(); renderProducts();
+  toast('🗑 Vente supprimée.','inf');
+}
+function renderVentes() {
+  const q=($('v-search')?.value||'').toLowerCase();
+  const fpid=$('v-filter')?.value||'';
+  $('v-count').textContent=`${sales.length} vente(s)`;
+  let list=[...sales].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  if(fpid) list=list.filter(s=>s.productId===fpid);
+  if(q)    list=list.filter(s=>{ const p=products.find(x=>x.id===s.productId); return p?.name.toLowerCase().includes(q)||(s.note||'').toLowerCase().includes(q); });
+  const tbody=$('v-tbody');
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><span class="e-icon">💰</span><p>${q||fpid?'Aucun résultat.':'Aucune vente enregistrée.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=list.map((v,i)=>{
+    const p=products.find(x=>x.id===v.productId), col=avColor(p?.name||'');
+    const ca=v.price*v.qty;
+    return `<tr class="anim" style="animation-delay:${i*.025}s">
+      <td><div class="td-prod">
+        <div class="td-av" style="background:${col}22;color:${col}">${(p?.name||'?')[0].toUpperCase()}</div>
+        <div><div class="td-name">${esc(p?.name||'Produit supprimé')}</div>
+        ${v.note?`<div class="td-sub">${esc(v.note)}</div>`:''}</div>
+      </div></td>
+      <td style="font-weight:600">${fF(v.price)}</td>
+      <td>${(v.qty||0).toLocaleString('fr-FR')}</td>
+      <td style="color:var(--blue);font-weight:600">${fF(ca)}</td>
+      <td><span class="badge bp">${chIcons[v.channel]||'📦'} ${esc(v.channel||'Autre')}</span></td>
+      <td style="color:var(--text3)">${fmtDate(v.date)}</td>
+      <td><button class="btn btn-sm btn-danger btn-icon" onclick="delVente('${v.id}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── RENTABILITÉ ──
+function sortRent(field) {
+  if(rSort.field===field) rSort.dir*=-1; else { rSort.field=field; rSort.dir=1; }
+  ['profit','roi','ca'].forEach(f=>{
+    const b=$(`rs-${f}`);
+    if(b) b.className='btn btn-sm '+(rSort.field===f?'btn-primary':'btn-secondary');
+  });
+  renderRent();
+}
+function renderRent() {
+  const q=($('r-search')?.value||'').toLowerCase();
+  let list=products.filter(p=>!q||p.name.toLowerCase().includes(q))
+    .map(p=>({ p, s:getStats(p.id) }))
+    .sort((a,b)=>((b.s[rSort.field]||0)-(a.s[rSort.field]||0))*rSort.dir);
+  $('r-count').textContent=`${list.length} produit(s)`;
+  const tbody=$('r-tbody');
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="9"><div class="empty-state"><span class="e-icon">📊</span><p>${q?'Aucun résultat.':'Ajoutez des achats puis des ventes.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=list.map(({p,s},i)=>{
+    const col=avColor(p.name);
+    const pb=s.profit>=0?'bg':'br', pi=s.profit>=0?'▲':'▼';
+    const rb=s.roi>=0?'bg':'br', mb=s.margin>=0?'bg':'br';
+    let stB,stL;
+    if(s.nSales===0){stB='by';stL='⏳ En attente'}
+    else if(s.profit>0){stB='bg';stL='✅ Rentable'}
+    else if(s.profit===0){stB='bb';stL='〰 Équilibre'}
+    else{stB='br';stL='❌ Déficit'}
+    return `<tr class="anim" style="animation-delay:${i*.03}s">
+      <td><div class="td-prod">
+        <div class="td-av" style="background:${col}22;color:${col}">${p.name[0].toUpperCase()}</div>
+        <div><div class="td-name">${esc(p.name)}</div>
+        <div class="td-sub">${(p.qty||0).toLocaleString('fr-FR')} achetés · ${s.sold} vendus</div></div>
+      </div></td>
+      <td style="color:var(--accent2);font-weight:600">${fF(s.invest)}</td>
+      <td style="color:var(--blue);font-weight:600">${fF(s.ca)}</td>
+      <td style="color:var(--text2)">${fF(s.unit)}</td>
+      <td><span class="badge ${pb}">${pi} ${fF(s.profit)}</span></td>
+      <td><span class="badge ${mb}">${fP(s.margin)}</span></td>
+      <td><span class="badge ${rb}">${fP(s.roi)}</span></td>
+      <td><span class="badge bp">${s.nSales}</span></td>
+      <td><span class="badge ${stB}">${stL}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── PRODUITS: RENDER ──
+function renderProducts() {
+  const q=($('prod-search')?.value||'').toLowerCase();
+  const sortBy=$('prod-sort')?.value||'name';
+  let list=products.filter(p=>!q||p.name.toLowerCase().includes(q))
+    .map(p=>({ p, s:getStats(p.id) }));
+  if(sortBy==='name')   list.sort((a,b)=>a.p.name.localeCompare(b.p.name));
+  if(sortBy==='stock')  list.sort((a,b)=>(b.p.qty-b.s.sold)-(a.p.qty-a.s.sold));
+  if(sortBy==='invest') list.sort((a,b)=>b.s.invest-a.s.invest);
+  if(sortBy==='profit') list.sort((a,b)=>b.s.profit-a.s.profit);
+  $('prod-count').textContent=`${products.length} produit(s)`;
+  const tbody=$('prod-tbody');
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="9"><div class="empty-state"><span class="e-icon">📦</span><p>${q?'Aucun résultat.':'Aucun produit enregistré.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=list.map(({p,s},i)=>{
+    const col=avColor(p.name);
+    const stock=Math.max(0,(p.qty||0)-s.sold);
+    const ratio=p.qty>0?(stock/p.qty)*100:0;
+    let stB,stL;
+    if(stock<=0){stB='br';stL='🔴 Rupture'}
+    else if(ratio<20){stB='by';stL='🟡 Stock faible'}
+    else{stB='bg';stL='🟢 En stock'}
+    const pp=s.profit>=0?'bg':'br';
+    return `<tr class="anim" style="animation-delay:${i*.025}s">
+      <td><div class="td-prod">
+        <div class="td-av" style="background:${col}22;color:${col}">${p.name[0].toUpperCase()}</div>
+        <div><div class="td-name">${esc(p.name)}</div>
+        <div class="td-sub">Ajouté le ${fmtDate(p.createdAt?.split('T')[0])}</div></div>
+      </div></td>
+      <td>${(p.qty||0).toLocaleString('fr-FR')}</td>
+      <td style="color:var(--green)">${s.sold.toLocaleString('fr-FR')}</td>
+      <td style="font-weight:600;color:${stock<=0?'var(--red)':stock<p.qty*0.2?'var(--yellow)':'var(--text)'}">${stock.toLocaleString('fr-FR')}</td>
+      <td style="color:var(--text2)">${fF(s.unit)}</td>
+      <td style="color:var(--accent2)">${fF(s.invest)}</td>
+      <td style="color:var(--blue)">${fF(s.ca)}</td>
+      <td><span class="badge ${pp}">${s.profit>=0?'▲':'▼'} ${fF(s.profit)}</span></td>
+      <td><span class="badge ${stB}">${stL}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── PROJETS ──
+function populateProjProductSelect(selId, val) {
+  const sel=$(selId);
+  if(!sel) return;
+  sel.innerHTML='<option value="">— Aucun produit —</option>'+
+    products.map(p=>`<option value="${p.id}"${p.id===val?' selected':''}>${esc(p.name)}</option>`).join('');
+}
+function populateProjSelect(selId, val) {
+  const sel=$(selId);
+  if(!sel) return;
+  sel.innerHTML='<option value="">— Aucun projet —</option>'+
+    projects.map(p=>`<option value="${p.id}"${p.id===val?' selected':''}>${esc(p.name)}</option>`).join('');
+}
+function openProjectModal(id) {
+  editProjId = id || null;
+  $('proj-modal-title').textContent = id ? '✏️ Modifier le Projet' : '🚀 Nouveau Projet';
+  populateProjProductSelect('pm-product','');
+  if(id) {
+    const pr=projects.find(x=>x.id===id);
+    if(pr) {
+      $('pm-name').value=pr.name||'';
+      $('pm-desc').value=pr.description||'';
+      populateProjProductSelect('pm-product', pr.productId||'');
+      $('pm-target').value=pr.targetQty||'';
+      $('pm-status').value=pr.status||'prep';
+      $('pm-start').value=pr.startDate||'';
+      $('pm-end').value=pr.endDate||'';
+    }
+  } else {
+    $('pm-name').value=''; $('pm-desc').value='';
+    $('pm-target').value=''; $('pm-status').value='prep';
+    $('pm-start').value=today(); $('pm-end').value='';
+  }
+  $('projectModal').classList.add('open');
+}
+function closeProjectModal(e) {
+  if(e && e.target!==$('projectModal')) return;
+  $('projectModal').classList.remove('open'); editProjId=null;
+}
+function saveProject() {
+  const name=str('pm-name');
+  if(!name){ toast('⚠️ Nom du projet requis.','err'); return; }
+  if(editProjId) {
+    const idx=projects.findIndex(x=>x.id===editProjId);
+    if(idx!==-1){
+      projects[idx]={ ...projects[idx], name, description:str('pm-desc'),
+        productId:str('pm-product'), targetQty:num('pm-target')||0,
+        status:str('pm-status'), startDate:str('pm-start'), endDate:str('pm-end') };
+      toast(`✏️ Projet "${name}" mis à jour !`,'ok');
+    }
+  } else {
+    projects.push({ id:uid(), name, description:str('pm-desc'),
+      productId:str('pm-product'), targetQty:num('pm-target')||0,
+      status:str('pm-status'), startDate:str('pm-start'), endDate:str('pm-end'),
+      createdAt:new Date().toISOString() });
+    toast(`✅ Projet "${name}" créé !`,'ok');
+  }
+  saveProjects(); badges(); renderProjects(); renderDash();
+  closeProjectModal(); checkNotifications();
+}
+function delProject(id) {
+  const pr=projects.find(x=>x.id===id);
+  if(!pr||!confirm(`Supprimer le projet "${pr.name}" ?`)) return;
+  projects=projects.filter(x=>x.id!==id);
+  saveProjects(); badges(); renderProjects(); renderDash();
+  toast(`🗑 Projet supprimé.`,'inf');
+}
+function filterProjets(el, status) {
+  projFilter=status;
+  document.querySelectorAll('#proj-status-filters .task-filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderProjects();
+}
+function renderProjects() {
+  let list=projects;
+  if(projFilter) list=list.filter(p=>p.status===projFilter);
+  $('proj-count-lbl').textContent=`${projects.length} projet(s)`;
+  const grid=$('proj-grid');
+  if(!list.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><span class="e-icon">🚀</span><p>${projFilter?'Aucun projet avec ce statut.':'Aucun projet. Créez votre premier projet !'}</p></div>`;
+    return;
+  }
+  grid.innerHTML=list.map((pr,i)=>{
+    const pct=getProjectProgress(pr);
+    const s=pr.productId?getStats(pr.productId):null;
+    const sold=s?s.sold:0;
+    const remaining=pr.targetQty>0?Math.max(0,pr.targetQty-sold):0;
+    const barColor=pct>=100?'var(--green)':pct>=60?'var(--accent)':pct>=30?'var(--yellow)':'var(--red)';
+    const prod=products.find(x=>x.id===pr.productId);
+    const daysLeft=pr.endDate?Math.ceil((new Date(pr.endDate)-new Date())/86400000):null;
+    const isLate=daysLeft!==null&&daysLeft<0&&pr.status!=='term';
+    return `<div class="proj-card s-${pr.status} anim" style="animation-delay:${i*.04}s">
+      <div class="proj-header">
+        <div class="proj-name">${esc(pr.name)}</div>
+        <span class="badge ${statusBadge[pr.status]||'bp'}">${statusLabels[pr.status]||pr.status}</span>
+      </div>
+      ${pr.description?`<div class="proj-desc">${esc(pr.description)}</div>`:'<div class="proj-desc" style="color:var(--text3)">Aucune description</div>'}
+      <div class="proj-meta">
+        ${prod?`<span class="badge bb">📦 ${esc(prod.name)}</span>`:''}
+        ${pr.startDate?`<span class="badge" style="background:var(--surface);color:var(--text2);border:1px solid var(--border);font-size:.67rem">📅 ${fmtDate(pr.startDate)}</span>`:''}
+        ${pr.endDate?`<span class="badge ${isLate?'br':'by'}" style="font-size:.67rem">${isLate?'⚠️ Retard ':'🏁 '}${fmtDate(pr.endDate)}</span>`:''}
+      </div>
+      ${pr.targetQty>0?`
+      <div class="proj-prog-label">
+        <span>${sold.toLocaleString('fr-FR')} / ${pr.targetQty.toLocaleString('fr-FR')} vendus</span>
+        <span style="color:${barColor};font-weight:700">${pct}%</span>
+      </div>
+      <div class="proj-prog-wrap">
+        <div class="proj-prog-bar" style="width:${pct}%;background:${barColor}"></div>
+      </div>
+      <div style="font-size:.72rem;color:var(--text3);margin-bottom:10px">${remaining} unité(s) restante(s) à vendre</div>`:''}
+      <div class="proj-stats">
+        <div class="proj-stat">
+          <div class="proj-stat-val" style="color:var(--accent2)">${s?fF(s.invest):'—'}</div>
+          <div class="proj-stat-lbl">Investi</div>
+        </div>
+        <div class="proj-stat">
+          <div class="proj-stat-val" style="color:var(--blue)">${s?fF(s.ca):'—'}</div>
+          <div class="proj-stat-lbl">CA</div>
+        </div>
+        <div class="proj-stat">
+          <div class="proj-stat-val" style="color:${s&&s.profit>=0?'var(--green)':'var(--red)'}">${s?fF(s.profit):'—'}</div>
+          <div class="proj-stat-lbl">Profit</div>
+        </div>
+      </div>
+      <div class="proj-actions">
+        <button class="btn btn-sm btn-secondary" onclick="openProjectModal('${pr.id}')">✏️ Modifier</button>
+        <button class="btn btn-sm btn-danger" onclick="delProject('${pr.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── TÂCHES ──
+function openTaskModal(id) {
+  editTaskId=id||null;
+  $('task-modal-title').textContent=id?'✏️ Modifier la Tâche':'✅ Nouvelle Tâche';
+  populateProjSelect('tm-project','');
+  if(id){
+    const t=tasks.find(x=>x.id===id);
+    if(t){
+      $('tm-title').value=t.title||'';
+      $('tm-desc').value=t.description||'';
+      populateProjSelect('tm-project',t.projectId||'');
+      $('tm-priority').value=t.priority||'moyenne';
+      $('tm-status').value=t.status||'todo';
+    }
+  } else {
+    $('tm-title').value=''; $('tm-desc').value='';
+    $('tm-priority').value='moyenne'; $('tm-status').value='todo';
+  }
+  $('taskModal').classList.add('open');
+}
+function closeTaskModal(e) {
+  if(e && e.target!==$('taskModal')) return;
+  $('taskModal').classList.remove('open'); editTaskId=null;
+}
+function saveTask() {
+  const title=str('tm-title');
+  if(!title){ toast('⚠️ Titre de la tâche requis.','err'); return; }
+  if(editTaskId){
+    const idx=tasks.findIndex(x=>x.id===editTaskId);
+    if(idx!==-1){
+      tasks[idx]={ ...tasks[idx], title, description:str('tm-desc'),
+        projectId:str('tm-project'), priority:str('tm-priority'), status:str('tm-status') };
+      toast(`✏️ Tâche mise à jour !`,'ok');
+    }
+  } else {
+    tasks.push({ id:uid(), title, description:str('tm-desc'),
+      projectId:str('tm-project'), priority:str('tm-priority'), status:str('tm-status'),
+      createdAt:new Date().toISOString() });
+    toast(`✅ Tâche "${title}" créée !`,'ok');
+  }
+  saveTasks(); badges(); renderTasks(); renderDash();
+  closeTaskModal(); checkNotifications();
+}
+function delTask(id) {
+  const t=tasks.find(x=>x.id===id);
+  if(!t||!confirm(`Supprimer la tâche "${t.title}" ?`)) return;
+  tasks=tasks.filter(x=>x.id!==id);
+  saveTasks(); badges(); renderTasks(); renderDash();
+  toast('🗑 Tâche supprimée.','inf');
+}
+function toggleTask(id) {
+  const t=tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.status=t.status==='done'?'todo':'done';
+  saveTasks(); badges(); renderTasks(); renderDash();
+}
+function filterTasks(el, filter) {
+  taskFilter=filter;
+  document.querySelectorAll('#task-filters .task-filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderTasks();
+}
+function renderTasks() {
+  let list=[...tasks];
+  if(taskFilter==='todo')    list=list.filter(t=>t.status==='todo');
+  else if(taskFilter==='doing')  list=list.filter(t=>t.status==='doing');
+  else if(taskFilter==='done')   list=list.filter(t=>t.status==='done');
+  else if(taskFilter==='critique') list=list.filter(t=>t.priority==='critique'&&t.status!=='done');
+  $('task-count-lbl').textContent=`${tasks.length} tâche(s) · ${tasks.filter(t=>t.status==='done').length} terminée(s)`;
+  const wrap=$('task-list-wrap');
+  if(!list.length){
+    wrap.innerHTML=`<div class="empty-state"><span class="e-icon">✅</span><p>${taskFilter?'Aucune tâche dans cette catégorie.':'Aucune tâche. Créez votre première tâche !'}</p></div>`;
+    return;
+  }
+  const order={critique:0,haute:1,moyenne:2,faible:3};
+  list.sort((a,b)=>(order[a.priority]||2)-(order[b.priority]||2));
+  const proj=id=>projects.find(x=>x.id===id);
+  wrap.innerHTML=`<div class="task-list">${list.map((t,i)=>{
+    const pr=proj(t.projectId);
+    const done=t.status==='done';
+    return `<div class="task-item${done?' done':''} anim" style="animation-delay:${i*.025}s">
+      <div class="task-checkbox${done?' checked':''}" onclick="toggleTask('${t.id}')">${done?'✓':''}</div>
+      <div class="task-info">
+        <div class="task-title">${esc(t.title)}</div>
+        ${t.description?`<div class="task-desc">${esc(t.description)}</div>`:''}
+        <div class="task-badges">
+          <span class="badge ${prioBadge[t.priority]||'bb'}">${prioLabels[t.priority]||t.priority}</span>
+          <span class="badge ${t.status==='done'?'bg':t.status==='doing'?'bp':'bb'}">${taskStatusLabel[t.status]||t.status}</span>
+          ${pr?`<span class="badge" style="background:var(--surface);color:var(--text2);border:1px solid var(--border);font-size:.67rem">🚀 ${esc(pr.name)}</span>`:''}
+        </div>
+      </div>
+      <div class="act">
+        <button class="btn btn-sm btn-secondary btn-icon" onclick="openTaskModal('${t.id}')">✏️</button>
+        <button class="btn btn-sm btn-danger btn-icon" onclick="delTask('${t.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── REVENUS ──
+function getDateBounds(tab) {
+  const now=new Date();
+  const y=now.getFullYear(), m=now.getMonth(), d=now.getDate();
+  const dow=now.getDay();
+  if(tab==='week'){
+    const start=new Date(y,m,d-dow);
+    const end=new Date(y,m,d-dow+6);
+    return { start:start.toISOString().split('T')[0], end:end.toISOString().split('T')[0] };
+  }
+  if(tab==='month'){
+    return { start:new Date(y,m,1).toISOString().split('T')[0], end:new Date(y,m+1,0).toISOString().split('T')[0] };
+  }
+  if(tab==='year'){
+    return { start:`${y}-01-01`, end:`${y}-12-31` };
+  }
+  return { start:null, end:null };
+}
+function filterSalesByPeriod(tab) {
+  const b=getDateBounds(tab);
+  if(!b.start) return [...sales];
+  return sales.filter(s=>s.date>=b.start&&s.date<=b.end);
+}
+function switchRevTab(el, tab) {
+  revTab=tab;
+  document.querySelectorAll('.rev-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderRevTable();
+}
+function renderRevenus() {
+  const now=new Date();
+  const y=now.getFullYear(), m=now.getMonth(), d=now.getDate(), dow=now.getDay();
+  // Week
+  const wStart=new Date(y,m,d-dow).toISOString().split('T')[0];
+  const wEnd=new Date(y,m,d-dow+6).toISOString().split('T')[0];
+  const wSales=sales.filter(s=>s.date>=wStart&&s.date<=wEnd);
+  const wCA=wSales.reduce((a,v)=>a+v.price*v.qty,0);
+  $('rev-week-ca').textContent=fF(wCA);
+  $('rev-week-sub').textContent=`${wSales.length} vente(s) · ${wSales.reduce((a,v)=>a+v.qty,0)} unités`;
+  // Month
+  const mStart=new Date(y,m,1).toISOString().split('T')[0];
+  const mEnd=new Date(y,m+1,0).toISOString().split('T')[0];
+  const mSales=sales.filter(s=>s.date>=mStart&&s.date<=mEnd);
+  const mCA=mSales.reduce((a,v)=>a+v.price*v.qty,0);
+  $('rev-month-ca').textContent=fF(mCA);
+  $('rev-month-sub').textContent=`${mSales.length} vente(s) · ${mSales.reduce((a,v)=>a+v.qty,0)} unités`;
+  // Year
+  const ySales=sales.filter(s=>s.date&&s.date.startsWith(String(y)));
+  const yCA=ySales.reduce((a,v)=>a+v.price*v.qty,0);
+  $('rev-year-ca').textContent=fF(yCA);
+  $('rev-year-sub').textContent=`${ySales.length} vente(s) · ${ySales.reduce((a,v)=>a+v.qty,0)} unités`;
+  // Avg per month
+  if(sales.length>0){
+    const dates=sales.map(s=>s.date).filter(Boolean).sort();
+    const firstD=new Date(dates[0]), lastD=new Date(dates[dates.length-1]);
+    const months=Math.max(1,Math.round((lastD-firstD)/2592000000)+1);
+    const totalCA=sales.reduce((a,v)=>a+v.price*v.qty,0);
+    $('rev-avg-ca').textContent=fF(totalCA/months);
+    $('rev-avg-sub').textContent=`Sur ${months} mois d'activité`;
+  } else {
+    $('rev-avg-ca').textContent='0 FCFA';
+    $('rev-avg-sub').textContent='Aucune vente';
+  }
+  renderRevTable();
+}
+function renderRevTable() {
+  const titles={ week:'📅 Ventes de la semaine', month:'🗓 Ventes du mois', year:'📆 Ventes de l\'année', all:'📊 Toutes les ventes' };
+  $('rev-table-title').textContent=titles[revTab]||'';
+  const list=filterSalesByPeriod(revTab).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  $('rev-table-count').textContent=`${list.length} vente(s)`;
+  const tbody=$('rev-tbody');
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><span class="e-icon">📅</span><p>Aucune vente sur cette période.</p></div></td></tr>`;
+  } else {
+    tbody.innerHTML=list.map((v,i)=>{
+      const p=products.find(x=>x.id===v.productId);
+      const s=p?getStats(p.id):null;
+      const ca=v.price*v.qty;
+      const unitProfit=s&&s.unit>0?v.price-s.unit:0;
+      const profit=unitProfit*v.qty;
+      const col=avColor(p?.name||'');
+      return `<tr class="anim" style="animation-delay:${i*.02}s">
+        <td><div class="td-prod">
+          <div class="td-av" style="background:${col}22;color:${col}">${(p?.name||'?')[0].toUpperCase()}</div>
+          <div class="td-name">${esc(p?.name||'Produit supprimé')}</div>
+        </div></td>
+        <td>${fF(v.price)}</td>
+        <td>${v.qty}</td>
+        <td style="color:var(--blue);font-weight:600">${fF(ca)}</td>
+        <td><span class="badge ${profit>=0?'bg':'br'}">${profit>=0?'▲':'▼'} ${fF(Math.abs(profit))}</span></td>
+        <td><span class="badge bp">${chIcons[v.channel]||'📦'} ${esc(v.channel)}</span></td>
+        <td style="color:var(--text3)">${fmtDate(v.date)}</td>
+      </tr>`;
+    }).join('');
+  }
+  // By product
+  const prodMap={};
+  list.forEach(v=>{
+    if(!prodMap[v.productId]) prodMap[v.productId]={qty:0,ca:0,profit:0,count:0};
+    const p=products.find(x=>x.id===v.productId);
+    const s=p?getStats(p.id):null;
+    const ca=v.price*v.qty;
+    const unitProfit=s&&s.unit>0?v.price-s.unit:0;
+    prodMap[v.productId].qty+=v.qty;
+    prodMap[v.productId].ca+=ca;
+    prodMap[v.productId].profit+=unitProfit*v.qty;
+    prodMap[v.productId].count++;
+  });
+  const totalPeriodCA=Object.values(prodMap).reduce((a,x)=>a+x.ca,0);
+  const prodRows=Object.entries(prodMap).sort((a,b)=>b[1].ca-a[1].ca);
+  const ptbody=$('rev-prod-tbody');
+  if(!prodRows.length){
+    ptbody.innerHTML=`<tr><td colspan="6"><div class="empty-state" style="padding:24px"><span class="e-icon" style="font-size:2rem">📦</span><p>Aucun produit sur cette période.</p></div></td></tr>`;
+  } else {
+    ptbody.innerHTML=prodRows.map(([pid,d],i)=>{
+      const p=products.find(x=>x.id===pid);
+      const col=avColor(p?.name||'');
+      const pct=totalPeriodCA>0?(d.ca/totalPeriodCA*100).toFixed(1):0;
+      return `<tr class="anim" style="animation-delay:${i*.025}s">
+        <td><div class="td-prod">
+          <div class="td-av" style="background:${col}22;color:${col}">${(p?.name||'?')[0].toUpperCase()}</div>
+          <div class="td-name">${esc(p?.name||'Produit supprimé')}</div>
+        </div></td>
+        <td><span class="badge bp">${d.count}</span></td>
+        <td>${d.qty.toLocaleString('fr-FR')}</td>
+        <td style="color:var(--blue);font-weight:600">${fF(d.ca)}</td>
+        <td><span class="badge ${d.profit>=0?'bg':'br'}">${d.profit>=0?'▲':'▼'} ${fF(Math.abs(d.profit))}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:99px;min-width:50px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:var(--accent);border-radius:99px"></div>
+            </div>
+            <span style="font-size:.78rem;font-weight:600;color:var(--accent2)">${pct}%</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+// ── DASHBOARD ──
+function renderDash() {
+  if(!products.length) {
+    $('d-stats').innerHTML=['💼 Investissement','💰 Chiffre d\'Affaires','📈 Bénéfice Net','📊 Marge','🔁 ROI']
+      .map((lb,i)=>{
+        const icons=['💼','💰','📈','📊','🔁'];
+        const cs=['c-purple','c-blue','c-green','c-yellow','c-blue'];
+        return `<div class="stat-card ${cs[i]}"><span class="stat-icon">${icons[i]}</span><div class="stat-label">${lb}</div><div class="stat-val" style="color:var(--text3)">— FCFA</div><div class="stat-sub">Aucune donnée</div></div>`;
+      }).join('');
+    $('d-top').innerHTML='<div class="empty-state"><span class="e-icon">📦</span><p>Ajoutez votre premier produit</p></div>';
+    $('d-sum').innerHTML='';
+    $('d-alerts').innerHTML='<div class="empty-state"><span class="e-icon">💡</span><p>Aucune donnée à analyser</p></div>';
+    $('d-proj-track').innerHTML='<div class="empty-state" style="padding:24px"><span class="e-icon" style="font-size:2rem;opacity:.25">🚀</span><p>Aucun projet actif</p></div>';
+    return;
+  }
+  const all=products.map(p=>({ p, s:getStats(p.id) }));
+  const tI=all.reduce((s,x)=>s+x.s.invest,0);
+  const tCA=all.reduce((s,x)=>s+x.s.ca,0);
+  const tPr=all.reduce((s,x)=>s+x.s.profit,0);
+  const tM=tCA>0?(tPr/tCA)*100:0;
+  const tR=tI>0?(tPr/tI)*100:0;
+  const prof=all.filter(x=>x.s.profit>0).length;
+  const totTasks=tasks.length;
+  const doneTasks=tasks.filter(t=>t.status==='done').length;
+  const activeProjCount=projects.filter(p=>p.status==='cours').length;
+  const pp=tPr>=0;
+  // KPI
+  $('d-stats').innerHTML=`
+    <div class="stat-card c-purple anim"><span class="stat-icon">💼</span><div class="stat-label">Investissement</div><div class="stat-val">${fF(tI)}</div><div class="stat-sub">${products.length} produit(s)</div></div>
+    <div class="stat-card c-blue anim" style="animation-delay:.05s"><span class="stat-icon">💰</span><div class="stat-label">Chiffre d'Affaires</div><div class="stat-val">${fF(tCA)}</div><div class="stat-sub">${sales.length} vente(s)</div></div>
+    <div class="stat-card ${pp?'c-green':'c-red'} anim" style="animation-delay:.1s"><span class="stat-icon">${pp?'📈':'📉'}</span><div class="stat-label">${pp?'Bénéfice Net':'Perte Nette'}</div><div class="stat-val ${pp?'pos':'neg'}">${fF(tPr)}</div><div class="stat-sub">${pp?'✅ Positif':'❌ Négatif'}</div></div>
+    <div class="stat-card c-yellow anim" style="animation-delay:.15s"><span class="stat-icon">📊</span><div class="stat-label">Marge Nette</div><div class="stat-val ${tM>=0?'pos':'neg'}">${fP(tM)}</div><div class="stat-sub">ROI: ${fP(tR)}</div></div>
+    <div class="stat-card c-blue anim" style="animation-delay:.2s"><span class="stat-icon">🚀</span><div class="stat-label">Projets Actifs</div><div class="stat-val" style="color:var(--accent2)">${activeProjCount}</div><div class="stat-sub">${projects.length} total</div></div>
+    <div class="stat-card c-green anim" style="animation-delay:.25s"><span class="stat-icon">✅</span><div class="stat-label">Tâches</div><div class="stat-val" style="color:var(--green)">${doneTasks}/${totTasks}</div><div class="stat-sub">terminées</div></div>
+  `;
+  // Top 5
+  const sorted=[...all].sort((a,b)=>b.s.profit-a.s.profit).slice(0,5);
+  const maxAbs=Math.max(...sorted.map(x=>Math.abs(x.s.profit)),1);
+  $('d-top').innerHTML=sorted.length?`<div class="top-products">${sorted.map(({p,s},i)=>{
+    const pct=Math.abs(s.profit)/maxAbs*100;
+    const pc=s.profit>=0?'var(--green)':'var(--red)';
+    const bc=s.profit>=0?'var(--green-d)':'var(--red-d)';
+    const rkC=i===0?'r1':i===1?'r2':'r3';
+    const rkE=i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
+    return `<div class="tp-row">
+      <div class="tp-rank ${i<3?rkC:''}" style="${i>=3?'background:var(--surface);color:var(--text3);border:1px solid var(--border)':''}">
+        ${rkE}
+      </div>
+      <div class="tp-info">
+        <div class="tp-name">${esc(p.name)}</div>
+        <div class="tp-sub">Invest: ${fF(s.invest)} · CA: ${fF(s.ca)}</div>
+        <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${bc}"></div></div>
+      </div>
+      <div class="tp-profit" style="color:${pc}">${fF(s.profit)}</div>
+    </div>`;
+  }).join('')}</div>`:'<div class="empty-state"><span class="e-icon">📊</span><p>Pas encore de ventes.</p></div>';
+  // Summary
+  const bestP=sorted[0];
+  const worstP=[...all].sort((a,b)=>a.s.profit-b.s.profit)[0];
+  const avgProjPct=projects.length?Math.round(projects.reduce((a,pr)=>a+getProjectProgress(pr),0)/projects.length):0;
+  $('d-sum').innerHTML=`
+    <div class="sum-item"><div class="sum-label">🏷 Produits</div><div class="sum-val">${products.length}</div></div>
+    <div class="sum-item"><div class="sum-label">💳 Ventes</div><div class="sum-val">${sales.length}</div></div>
+    <div class="sum-item"><div class="sum-label">✅ Rentables</div><div class="sum-val" style="color:var(--green)">${prof}</div></div>
+    <div class="sum-item"><div class="sum-label">❌ En perte</div><div class="sum-val" style="color:var(--red)">${all.filter(x=>x.s.nSales>0&&x.s.profit<0).length}</div></div>
+    <div class="sum-item"><div class="sum-label">🥇 Meilleur</div><div class="sum-val" style="color:var(--green);font-size:.82rem">${esc(bestP?.p?.name||'—')}</div></div>
+    <div class="sum-item"><div class="sum-label">📊 Prog. Projets</div><div class="sum-val" style="color:var(--accent2)">${avgProjPct}%</div></div>
+  `;
+  // Project tracking
+  const activeProjs=projects.filter(p=>p.status==='cours'||p.status==='prep').slice(0,4);
+  const pt=$('d-proj-track');
+  if(!activeProjs.length){
+    pt.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:.84rem">Aucun projet actif</div>';
+  } else {
+    pt.innerHTML=activeProjs.map(pr=>{
+      const pct=getProjectProgress(pr);
+      const barColor=pct>=100?'var(--green)':pct>=60?'var(--accent)':pct>=30?'var(--yellow)':'var(--red)';
+      return `<div class="pt-row anim">
+        <div class="pt-info">
+          <div class="pt-name">${esc(pr.name)}</div>
+          <div class="pt-sub">${statusLabels[pr.status]||pr.status}</div>
+          <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-top:7px">
+            <div style="width:${pct}%;height:100%;background:${barColor};border-radius:99px;transition:width .7s ease"></div>
+          </div>
+        </div>
+        <div class="pt-pct">${pct}%</div>
+      </div>`;
+    }).join('');
+  }
+  // Alerts
+  checkNotifications(true);
+}
+
+// ── NOTIFICATIONS ──
+function checkNotifications(inline) {
+  const noS=products.filter(p=>!sales.some(s=>s.productId===p.id));
+  const inLoss=products.map(p=>({ p, s:getStats(p.id) })).filter(x=>x.s.nSales>0&&x.s.profit<0);
+  const now=new Date();
+  const lateProj=projects.filter(pr=>{
+    if(!pr.endDate||pr.status==='term'||pr.status==='susp') return false;
+    return new Date(pr.endDate)<now;
+  });
+  const critTasks=tasks.filter(t=>t.priority==='critique'&&t.status!=='done');
+  const lowStock=products.filter(p=>{ const s=getStats(p.id); const stock=Math.max(0,p.qty-s.sold); return stock>0&&stock<p.qty*0.2; });
+  const termProj=projects.filter(p=>p.status==='term');
+  let al='';
+  if(lowStock.length)  al+=`<div class="alert a-warn">⚠️ <strong>${lowStock.length} produit(s)</strong> en stock faible : ${lowStock.slice(0,3).map(p=>esc(p.name)).join(', ')}${lowStock.length>3?'…':''}</div>`;
+  if(noS.length)       al+=`<div class="alert a-warn">⏳ <strong>${noS.length} produit(s)</strong> sans ventes : ${noS.slice(0,3).map(p=>esc(p.name)).join(', ')}${noS.length>3?'…':''}</div>`;
+  if(inLoss.length)    al+=`<div class="alert a-err">📉 <strong>${inLoss.length} produit(s)</strong> en déficit : ${inLoss.slice(0,2).map(x=>esc(x.p.name)).join(', ')}${inLoss.length>2?'…':''}</div>`;
+  if(lateProj.length)  al+=`<div class="alert a-err">🚨 <strong>${lateProj.length} projet(s) en retard</strong> : ${lateProj.slice(0,2).map(p=>esc(p.name)).join(', ')}${lateProj.length>2?'…':''}</div>`;
+  if(critTasks.length) al+=`<div class="alert a-err">🔴 <strong>${critTasks.length} tâche(s) critique(s)</strong> non terminée(s)</div>`;
+  if(termProj.length)  al+=`<div class="alert a-ok">🎉 <strong>${termProj.length} projet(s)</strong> terminé(s) avec succès !</div>`;
+  if(!al) al='<div class="alert a-ok">✅ Tout est en ordre, aucune alerte active.</div>';
+  if(inline) $('d-alerts').innerHTML=al;
+}
+
+// ── EXPORT CSV ──
+function exportCSV() {
+  if(!products.length){ toast('ℹ️ Aucune donnée.','inf'); return; }
+  const h=['Produit','Qté Achetée','Investissement (FCFA)','CA (FCFA)','Coût/unité (FCFA)','Profit (FCFA)','Marge (%)','ROI (%)','Nb Ventes','Qté Vendue'];
+  const rows=products.map(p=>{ const s=getStats(p.id); return [`"${(p.name||'').replace(/"/g,'""')}"`,p.qty,Math.round(s.invest),Math.round(s.ca),Math.round(s.unit),Math.round(s.profit),s.margin.toFixed(2),s.roi.toFixed(2),s.nSales,s.sold].join(';'); });
+  const csv='\uFEFF'+[h.join(';'),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`roi_fcfa_${today()}.csv`; a.click();
+  toast('📤 Export CSV généré !','ok');
+}
+
+// ── RESET ──
+function confirmReset() {
+  if(!products.length&&!sales.length&&!projects.length&&!tasks.length){ toast('ℹ️ Aucune donnée.','inf'); return; }
+  if(!confirm('⚠️ Réinitialiser TOUTES les données ?')) return;
+  products=[]; sales=[]; projects=[]; tasks=[]; ideas=[]; marketing=[];
+  save(); saveProjects(); saveTasks(); saveIdeas(); saveMarketing();
+  toast('🗑 Données réinitialisées.','inf');
+}
+
+// ── TOAST ──
+function toast(msg, type='inf') {
+  const el=document.createElement('div');
+  el.className=`toast ${type}`; el.textContent=msg;
+  $('toasts').appendChild(el);
+  setTimeout(()=>{ el.style.animation='tOut .3s ease forwards'; setTimeout(()=>el.remove(),300); }, 3400);
+}
+// ── STATE: IDÉES & MARKETING ──
+let ideas     = JSON.parse(localStorage.getItem('rp2_ideas')     || '[]');
+let marketing = JSON.parse(localStorage.getItem('rp2_marketing') || '[]');
+let editIdeaId= null;
+let editMktId = null;
+let ideaFilter= '';
+let mktFilter = '';
+
+// ── SAVE ──
+function saveIdeas()     { localStorage.setItem('rp2_ideas',     JSON.stringify(ideas)); }
+function saveMarketing() { localStorage.setItem('rp2_marketing', JSON.stringify(marketing)); }
+
+// ── SCORING CONFIG ──
+const CRITERIA = [
+  { key:'wow',     label:'Effet Wow',            sub:'Produit surprenant, désirable, viral'      },
+  { key:'margin',  label:'Marge Solide',          sub:'Potentiel de profit élevé'                 },
+  { key:'quality', label:'Qualité Perçue',        sub:'Produit solide, retours clients positifs'  },
+  { key:'selling', label:'Se vend déjà',          sub:'Preuve de marché existante'                },
+  { key:'problem', label:'Résout un problème',    sub:'Répond à un besoin humain réel'            },
+];
+
+// ── SCORE HELPERS ──
+function getScoreClass(total) {
+  if(total>=20) return { cls:'sc-excellent', badge:'🔥 Excellent potentiel', color:'var(--orange)' };
+  if(total>=14) return { cls:'sc-bon',       badge:'✅ Bon potentiel',        color:'var(--green)'  };
+  if(total>=8)  return { cls:'sc-moyen',     badge:'⚠️ Potentiel moyen',     color:'var(--yellow)' };
+  return              { cls:'sc-faible',     badge:'❌ Faible potentiel',    color:'var(--text3)'  };
+}
+function getCriteriaColor(val) {
+  if(val>=5) return 'var(--green)';
+  if(val>=4) return 'var(--accent2)';
+  if(val>=3) return 'var(--yellow)';
+  if(val>=2) return 'var(--orange)';
+  return 'var(--red)';
+}
+function getBarColor(val) {
+  if(val>=5) return 'var(--green-d)';
+  if(val>=4) return 'var(--accent)';
+  if(val>=3) return 'var(--yellow)';
+  if(val>=2) return 'var(--orange)';
+  return 'var(--red-d)';
+}
+
+// ── SCORE DOTS STATE (modal) ──
+let tempScores = { wow:0, margin:0, quality:0, selling:0, problem:0 };
+
+function buildScoreCriteria() {
+  const wrap = $('score-criteria');
+  if(!wrap) return;
+  wrap.innerHTML = CRITERIA.map(c => `
+    <div class="score-row">
+      <div class="score-lbl">
+        ${c.label}
+        <span class="score-lbl-sub">${c.sub}</span>
+      </div>
+      <div class="score-dots" id="dots-${c.key}">
+        ${[1,2,3,4,5].map(n=>`
+          <div class="sdot${tempScores[c.key]>=n?' on':''}"
+               data-key="${c.key}" data-val="${n}"
+               onclick="setScore('${c.key}',${n})">
+            ${n}
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  updateScoreDisplay();
+}
+
+function setScore(key, val) {
+  tempScores[key] = tempScores[key]===val ? 0 : val;
+  const dots = document.querySelectorAll(`#dots-${key} .sdot`);
+  dots.forEach((d,i) => d.classList.toggle('on', i < tempScores[key]));
+  updateScoreDisplay();
+}
+
+function updateScoreDisplay() {
+  const total = Object.values(tempScores).reduce((a,b)=>a+b, 0);
+  const sc    = getScoreClass(total);
+  const vEl   = $('score-total-val');
+  const bEl   = $('score-total-badge');
+  if(vEl) { vEl.textContent = `${total} / 25`; vEl.style.color = sc.color; }
+  if(bEl) { bEl.textContent = sc.badge; bEl.style.color = sc.color; }
+}
+
+function updateIdeaMarginPreview() {
+  const cost  = parseFloat($('im-cost')?.value)  || 0;
+  const price = parseFloat($('im-price')?.value) || 0;
+  const prev  = $('im-margin-preview');
+  if(!prev) return;
+  if(cost > 0 && price > 0) {
+    const profit = price - cost;
+    const pct    = ((profit / price) * 100).toFixed(1);
+    prev.style.display = 'block';
+    $('im-margin-pct').textContent  = pct + ' %';
+    $('im-margin-val').textContent  = Math.round(profit).toLocaleString('fr-FR') + ' FCFA';
+    $('im-margin-pct').style.color  = profit >= 0 ? 'var(--green)' : 'var(--red)';
+    $('im-margin-val').style.color  = profit >= 0 ? 'var(--green)' : 'var(--red)';
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+// ── IDÉES MODAL ──
+function openIdeaModal(id) {
+  editIdeaId = id || null;
+  $('idea-modal-title').textContent = id ? '✏️ Modifier l\'Idée' : '💡 Nouvelle Idée Produit';
+  if(id) {
+    const idea = ideas.find(x=>x.id===id);
+    if(idea) {
+      $('im-name').value     = idea.name        || '';
+      $('im-notes').value    = idea.notes       || '';
+      $('im-category').value = idea.category    || '';
+      $('im-status').value   = idea.status      || 'idea';
+      $('im-ref').value      = idea.ref         || '';
+      $('im-cost').value     = idea.cost        || '';
+      $('im-price').value    = idea.price       || '';
+      tempScores = { ...{ wow:0,margin:0,quality:0,selling:0,problem:0 }, ...(idea.scores||{}) };
+    }
+  } else {
+    $('im-name').value=''; $('im-notes').value=''; $('im-category').value='';
+    $('im-status').value='idea'; $('im-ref').value='';
+    $('im-cost').value=''; $('im-price').value='';
+    tempScores = { wow:0, margin:0, quality:0, selling:0, problem:0 };
+  }
+  buildScoreCriteria();
+  updateIdeaMarginPreview();
+  $('ideaModal').classList.add('open');
+}
+function closeIdeaModal(e) {
+  if(e && e.target !== $('ideaModal')) return;
+  $('ideaModal').classList.remove('open'); editIdeaId = null;
+}
+function saveIdea() {
+  const name = ($('im-name')?.value||'').trim();
+  if(!name) { toast('⚠️ Nom du produit requis.','err'); return; }
+  const payload = {
+    name,
+    notes:    ($('im-notes')?.value||'').trim(),
+    category: ($('im-category')?.value||'').trim(),
+    status:   $('im-status')?.value || 'idea',
+    ref:      ($('im-ref')?.value||'').trim(),
+    cost:     parseFloat($('im-cost')?.value)  || 0,
+    price:    parseFloat($('im-price')?.value) || 0,
+    scores:   { ...tempScores }
+  };
+  if(editIdeaId) {
+    const idx = ideas.findIndex(x=>x.id===editIdeaId);
+    if(idx!==-1) { ideas[idx] = { ...ideas[idx], ...payload }; toast(`✏️ Idée "${name}" mise à jour !`,'ok'); }
+  } else {
+    ideas.push({ id:uid(), ...payload, createdAt:new Date().toISOString() });
+    toast(`✅ Idée "${name}" ajoutée !`,'ok');
+  }
+  saveIdeas(); badges(); renderIdeas();
+  closeIdeaModal(); updateIdeaBadges();
+}
+function delIdea(id) {
+  const idea = ideas.find(x=>x.id===id);
+  if(!idea || !confirm(`Supprimer l'idée "${idea.name}" ?`)) return;
+  ideas = ideas.filter(x=>x.id!==id);
+  saveIdeas(); badges(); renderIdeas(); updateIdeaBadges();
+  toast('🗑 Idée supprimée.','inf');
+}
+function filterIdeas(el, status) {
+  ideaFilter = status;
+  document.querySelectorAll('#idea-status-filters .task-filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderIdeas();
+}
+function updateIdeaBadges() {
+  $('b-idees').textContent = ideas.length;
+}
+
+// ── IDÉES RENDER ──
+function renderIdeas() {
+  const q = ($('ideas-search')?.value||'').toLowerCase();
+  let list = [...ideas];
+  if(ideaFilter) list = list.filter(x=>x.status===ideaFilter);
+  if(q) list = list.filter(x=>x.name.toLowerCase().includes(q)||(x.notes||'').toLowerCase().includes(q)||(x.category||'').toLowerCase().includes(q));
+  list.sort((a,b)=>{
+    const ta = Object.values(a.scores||{}).reduce((s,v)=>s+v,0);
+    const tb = Object.values(b.scores||{}).reduce((s,v)=>s+v,0);
+    return tb-ta;
+  });
+  $('idees-count-lbl').textContent = `${ideas.length} idée(s)`;
+
+  // Stats bar
+  const total      = ideas.length;
+  const validated  = ideas.filter(x=>x.status==='validated').length;
+  const researching= ideas.filter(x=>x.status==='research').length;
+  const excellent  = ideas.filter(x=>Object.values(x.scores||{}).reduce((a,b)=>a+b,0)>=20).length;
+  $('idees-stats').innerHTML=`
+    <div class="stat-card c-blue anim"><span class="stat-icon">💡</span><div class="stat-label">Total Idées</div><div class="stat-val">${total}</div><div class="stat-sub">enregistrées</div></div>
+    <div class="stat-card c-green anim" style="animation-delay:.05s"><span class="stat-icon">✅</span><div class="stat-label">Validées</div><div class="stat-val" style="color:var(--green)">${validated}</div><div class="stat-sub">prêtes à tester</div></div>
+    <div class="stat-card c-purple anim" style="animation-delay:.1s"><span class="stat-icon">🔍</span><div class="stat-label">En Recherche</div><div class="stat-val" style="color:var(--accent2)">${researching}</div><div class="stat-sub">en cours d'analyse</div></div>
+    <div class="stat-card c-orange anim" style="animation-delay:.15s"><span class="stat-icon">🔥</span><div class="stat-label">Potentiel Excellent</div><div class="stat-val" style="color:var(--orange)">${excellent}</div><div class="stat-sub">score ≥ 20 / 25</div></div>
+  `;
+
+  const grid = $('ideas-grid');
+  if(!list.length) {
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><span class="e-icon">💡</span><p>${q||ideaFilter?'Aucune idée trouvée.':'Aucune idée enregistrée.<br>Cliquez "＋ Nouvelle Idée" pour commencer !'}</p></div>`;
+    return;
+  }
+
+  const statusLabel = { idea:'💡 Idée', research:'🔍 En recherche', validated:'✅ Validé', rejected:'❌ Écarté' };
+  const statusBadgeMap = { idea:'bb', research:'bp', validated:'bg', rejected:'br' };
+
+  grid.innerHTML = list.map((idea, i) => {
+    const total  = Object.values(idea.scores||{}).reduce((a,b)=>a+b, 0);
+    const sc     = getScoreClass(total);
+    const profit = (idea.price||0) - (idea.cost||0);
+    const pct    = idea.price>0 ? ((profit/idea.price)*100).toFixed(1) : null;
+    return `<div class="idea-card ${sc.cls} anim" style="animation-delay:${i*.04}s">
+      <div class="idea-header">
+        <div class="idea-name">${esc(idea.name)}</div>
+        <span class="badge ${statusBadgeMap[idea.status]||'bb'}">${statusLabel[idea.status]||idea.status}</span>
+      </div>
+      ${idea.category?`<div style="margin-bottom:7px"><span class="badge" style="background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid var(--border);font-size:.65rem">🏷 ${esc(idea.category)}</span></div>`:''}
+      ${idea.notes?`<div class="idea-notes">${esc(idea.notes).replace(/\n/g,'<br>')}</div>`:''}
+
+      <div class="idea-score-bars">
+        ${CRITERIA.map(c=>{
+          const val = (idea.scores||{})[c.key] || 0;
+          return `<div class="isb-row">
+            <div class="isb-lbl">${c.label}</div>
+            <div class="isb-bar-wrap">
+              <div class="isb-bar" style="width:${val*20}%;background:${getBarColor(val)}"></div>
+            </div>
+            <div class="isb-val" style="color:${getCriteriaColor(val)}">${val}</div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div class="idea-score-footer">
+        <div>
+          <div style="font-size:.65rem;color:var(--text3);margin-bottom:2px">Score Total</div>
+          <div class="idea-score-num" style="color:${sc.color}">${total} / 25</div>
+        </div>
+        <span class="badge" style="background:rgba(255,255,255,0.04);color:${sc.color};border:1px solid ${sc.color}33;font-size:.72rem">${sc.badge}</span>
+      </div>
+
+      ${(idea.cost||idea.price)?`
+      <div class="idea-prices">
+        ${idea.cost?`<div class="idea-price-item"><div class="idea-price-lbl">💸 Coût fournisseur</div><div class="idea-price-val" style="color:var(--accent2)">${Math.round(idea.cost).toLocaleString('fr-FR')} FCFA</div></div>`:''}
+        ${idea.price?`<div class="idea-price-item"><div class="idea-price-lbl">💰 Prix de vente</div><div class="idea-price-val" style="color:var(--blue)">${Math.round(idea.price).toLocaleString('fr-FR')} FCFA</div></div>`:''}
+        ${pct!==null?`<div class="idea-price-item" style="grid-column:1/-1"><div class="idea-price-lbl">📈 Marge estimée</div><div class="idea-price-val" style="color:${profit>=0?'var(--green)':'var(--red)'}">${profit>=0?'+':''}${pct}% · ${Math.round(profit).toLocaleString('fr-FR')} FCFA/unité</div></div>`:''}
+      </div>`:''}
+
+      ${idea.ref?`<div style="margin-bottom:10px"><a href="${esc(idea.ref)}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--accent2);text-decoration:none;display:inline-flex;align-items:center;gap:4px">🔗 Voir la référence →</a></div>`:''}
+
+      <div class="idea-actions">
+        <button class="btn btn-sm btn-secondary" onclick="openIdeaModal('${idea.id}')">✏️ Modifier</button>
+        <button class="btn btn-sm btn-danger" onclick="delIdea('${idea.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MARKETING MODAL ──
+function openMktModal(id) {
+  editMktId = id || null;
+  $('mkt-modal-title').textContent = id ? '✏️ Modifier la Stratégie' : '📣 Nouvelle Stratégie Marketing';
+  const allItems = [...products.map(p=>({ id:p.id, label:`📦 ${p.name}` })),
+                    ...projects.map(p=>({ id:'proj_'+p.id, label:`🚀 ${p.name}` }))];
+  $('mm-product').innerHTML = '<option value="">— Aucun —</option>' +
+    allItems.map(x=>`<option value="${x.id}">${esc(x.label)}</option>`).join('');
+  if(id) {
+    const s = marketing.find(x=>x.id===id);
+    if(s) {
+      $('mm-name').value      = s.name      || '';
+      $('mm-product').value   = s.linkedId  || '';
+      $('mm-channel').value   = s.channel   || 'Facebook Ads';
+      $('mm-objective').value = s.objective || 'Ventes';
+      $('mm-budget').value    = s.budget    || '';
+      $('mm-status').value    = s.status    || 'planned';
+      $('mm-start').value     = s.startDate || '';
+      $('mm-end').value       = s.endDate   || '';
+      $('mm-audience').value  = s.audience  || '';
+      $('mm-notes').value     = s.notes     || '';
+    }
+  } else {
+    $('mm-name').value=''; $('mm-product').value='';
+    $('mm-channel').value='Facebook Ads'; $('mm-objective').value='Ventes';
+    $('mm-budget').value=''; $('mm-status').value='planned';
+    $('mm-start').value=today(); $('mm-end').value='';
+    $('mm-audience').value=''; $('mm-notes').value='';
+  }
+  $('mktModal').classList.add('open');
+}
+function closeMktModal(e) {
+  if(e && e.target !== $('mktModal')) return;
+  $('mktModal').classList.remove('open'); editMktId = null;
+}
+function saveMkt() {
+  const name = ($('mm-name')?.value||'').trim();
+  if(!name) { toast('⚠️ Nom de la stratégie requis.','err'); return; }
+  const payload = {
+    name,
+    linkedId:  $('mm-product')?.value   || '',
+    channel:   $('mm-channel')?.value   || '',
+    objective: $('mm-objective')?.value || '',
+    budget:    parseFloat($('mm-budget')?.value) || 0,
+    status:    $('mm-status')?.value    || 'planned',
+    startDate: $('mm-start')?.value     || '',
+    endDate:   $('mm-end')?.value       || '',
+    audience:  ($('mm-audience')?.value||'').trim(),
+    notes:     ($('mm-notes')?.value   ||'').trim(),
+  };
+  if(editMktId) {
+    const idx = marketing.findIndex(x=>x.id===editMktId);
+    if(idx!==-1) { marketing[idx] = { ...marketing[idx], ...payload }; toast(`✏️ Stratégie "${name}" mise à jour !`,'ok'); }
+  } else {
+    marketing.push({ id:uid(), ...payload, createdAt:new Date().toISOString() });
+    toast(`✅ Stratégie "${name}" créée !`,'ok');
+  }
+  saveMarketing(); badges(); renderMarketing();
+  closeMktModal();
+}
+function delMkt(id) {
+  const s = marketing.find(x=>x.id===id);
+  if(!s || !confirm(`Supprimer la stratégie "${s.name}" ?`)) return;
+  marketing = marketing.filter(x=>x.id!==id);
+  saveMarketing(); badges(); renderMarketing();
+  toast('🗑 Stratégie supprimée.','inf');
+}
+function filterMkt(el, status) {
+  mktFilter = status;
+  document.querySelectorAll('#mkt-status-filters .task-filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderMarketing();
+}
+
+// ── MARKETING RENDER ──
+function renderMarketing() {
+  let list = [...marketing];
+  if(mktFilter) list = list.filter(x=>x.status===mktFilter);
+  list.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  $('mkt-count-lbl').textContent = `${marketing.length} stratégie(s)`;
+  $('b-marketing').textContent   = marketing.filter(x=>x.status==='active').length;
+
+  const active   = marketing.filter(x=>x.status==='active').length;
+  const planned  = marketing.filter(x=>x.status==='planned').length;
+  const done     = marketing.filter(x=>x.status==='done').length;
+  const budget   = marketing.reduce((a,x)=>a+(x.budget||0), 0);
+  $('mkt-stats').innerHTML=`
+    <div class="stat-card c-purple anim"><span class="stat-icon">📣</span><div class="stat-label">Total Stratégies</div><div class="stat-val">${marketing.length}</div><div class="stat-sub">enregistrées</div></div>
+    <div class="stat-card c-green anim" style="animation-delay:.05s"><span class="stat-icon">🚀</span><div class="stat-label">Actives</div><div class="stat-val" style="color:var(--accent2)">${active}</div><div class="stat-sub">${planned} planifiée(s)</div></div>
+    <div class="stat-card c-blue anim" style="animation-delay:.1s"><span class="stat-icon">✅</span><div class="stat-label">Terminées</div><div class="stat-val" style="color:var(--green)">${done}</div><div class="stat-sub">campagnes finies</div></div>
+    <div class="stat-card c-yellow anim" style="animation-delay:.15s"><span class="stat-icon">💸</span><div class="stat-label">Budget Total</div><div class="stat-val" style="color:var(--yellow);font-size:1rem">${Math.round(budget).toLocaleString('fr-FR')} FCFA</div><div class="stat-sub">alloué marketing</div></div>
+  `;
+
+  const grid = $('mkt-grid');
+  if(!list.length) {
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><span class="e-icon">📣</span><p>${mktFilter?'Aucune stratégie avec ce statut.':'Aucune stratégie marketing.<br>Cliquez "＋ Nouvelle Stratégie" !'}</p></div>`;
+    return;
+  }
+
+  const chIcons2 = {
+    'Facebook Ads':'📘','TikTok Ads':'🎵','TikTok Organique':'🎵',
+    'Instagram Ads':'📸','Instagram Organique':'📸','WhatsApp':'📱',
+    'Influenceur':'🌟','Email Marketing':'📧','SEO / Blog':'🔍',
+    'YouTube':'▶️','Bouche à oreille':'🗣','Autre':'📦'
+  };
+  const mStatusLabel = { planned:'📋 Planifiée', active:'🚀 Active', done:'✅ Terminée', paused:'⏸ Pausée' };
+  const mStatusBadge = { planned:'bb', active:'bp', done:'bg', paused:'by' };
+  const mStatusCls   = { planned:'ms-planned', active:'ms-active', done:'ms-done', paused:'ms-paused' };
+  const objIcon = { Ventes:'💰', Notoriété:'👁', Trafic:'🚦', Leads:'📋', Fidélisation:'❤️', Lancement:'🚀' };
+
+  grid.innerHTML = list.map((s, i) => {
+    const linked = s.linkedId
+      ? (s.linkedId.startsWith('proj_')
+          ? projects.find(x=>x.id===s.linkedId.replace('proj_',''))
+          : products.find(x=>x.id===s.linkedId))
+      : null;
+    const linkedLabel = linked
+      ? (s.linkedId.startsWith('proj_') ? `🚀 ${linked.name}` : `📦 ${linked.name}`)
+      : null;
+    const now = new Date();
+    const daysLeft = s.endDate ? Math.ceil((new Date(s.endDate)-now)/86400000) : null;
+    const isLate = daysLeft!==null && daysLeft<0 && s.status!=='done';
+    return `<div class="mkt-card ${mStatusCls[s.status]||'ms-planned'} anim" style="animation-delay:${i*.04}s">
+      <div class="mkt-header">
+        <div class="mkt-name">${esc(s.name)}</div>
+        <span class="badge ${mStatusBadge[s.status]||'bb'}">${mStatusLabel[s.status]||s.status}</span>
+      </div>
+      <div class="mkt-meta">
+        <span class="badge bb">${chIcons2[s.channel]||'📦'} ${esc(s.channel)}</span>
+        <span class="badge bp">${objIcon[s.objective]||'🎯'} ${esc(s.objective)}</span>
+        ${linkedLabel?`<span class="badge" style="background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid var(--border);font-size:.66rem">${esc(linkedLabel)}</span>`:''}
+      </div>
+      <div class="mkt-kpi-grid">
+        <div class="mkt-kpi-item">
+          <div class="mkt-kpi-lbl">💸 Budget alloué</div>
+          <div class="mkt-kpi-val" style="color:var(--yellow)">${s.budget?Math.round(s.budget).toLocaleString('fr-FR')+' FCFA':'—'}</div>
+        </div>
+        <div class="mkt-kpi-item">
+          <div class="mkt-kpi-lbl">📅 Période</div>
+          <div class="mkt-kpi-val" style="color:var(--text2);font-size:.78rem">
+            ${s.startDate?fmtDate(s.startDate):'—'} → ${s.endDate?fmtDate(s.endDate):'—'}
+          </div>
+        </div>
+        ${s.audience?`
+        <div class="mkt-kpi-item" style="grid-column:1/-1">
+          <div class="mkt-kpi-lbl">👥 Audience cible</div>
+          <div class="mkt-kpi-val" style="color:var(--text);font-size:.8rem">${esc(s.audience)}</div>
+        </div>`:''}
+        ${isLate?`
+        <div class="mkt-kpi-item" style="grid-column:1/-1;background:var(--red-bg);border-color:var(--red-b)">
+          <div class="mkt-kpi-lbl" style="color:var(--red)">⚠️ Campagne en retard</div>
+          <div class="mkt-kpi-val" style="color:var(--red)">${Math.abs(daysLeft)} jour(s) de dépassement</div>
+        </div>`
+        : daysLeft!==null&&daysLeft<=7&&s.status==='active'?`
+        <div class="mkt-kpi-item" style="grid-column:1/-1;background:var(--yellow-bg);border-color:var(--yellow-b)">
+          <div class="mkt-kpi-lbl" style="color:var(--yellow)">⏳ Se termine bientôt</div>
+          <div class="mkt-kpi-val" style="color:var(--yellow)">${daysLeft} jour(s) restant(s)</div>
+        </div>`:''}
+      </div>
+      ${s.notes?`<div class="mkt-notes-box">${esc(s.notes).replace(/\n/g,'<br>')}</div>`:''}
+      <div class="mkt-actions">
+        <button class="btn btn-sm btn-secondary" onclick="openMktModal('${s.id}')">✏️ Modifier</button>
+        <button class="btn btn-sm btn-danger" onclick="delMkt('${s.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── INIT ──
+(function() {
+  const vd=$('v-date'); if(vd) vd.value=today();
+  badges(); renderDash();
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      $('editModal').classList.remove('open');
+      $('projectModal').classList.remove('open');
+      $('taskModal').classList.remove('open');
+     $('ideaModal').classList.remove('open');
+      $('mktModal').classList.remove('open');
+      closeSb();
+    }
+  });
+})();
+</script>
+</body>
+</html>
